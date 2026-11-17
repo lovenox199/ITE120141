@@ -181,13 +181,13 @@
             <span class="mt-0.5 font-medium leading-none">Reverse Color</span>
           </button>
 
-          <button onclick="cycleTextZoom()" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="Cycle Font Size">
+          <button onclick="cycleTextZoom()" class="flex flex-col items-center justify-center w-24 px-2 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors shrink-0" title="Cycle Font Size">
             <div class="flex items-baseline space-x-0.5 font-bold font-serif text-[13px] leading-tight">
               <span class="text-[10px]">A</span>
               <span class="text-[13px]">A</span>
               <span class="text-[16px]">A</span>
             </div>
-            <span class="mt-0.5 font-medium leading-none" id="zoomLevelIndicator">Text Zoom</span>
+            <span class="mt-0.5 font-medium leading-none whitespace-nowrap" id="zoomLevelIndicator">Text Zoom</span>
           </button>
         </div>
       </header>
@@ -478,17 +478,17 @@
         iteNumber: 'Intro',
         vignette: `
           <div class="bg-[#f4f8fb] border-2 border-[#0d4b75] rounded-lg p-7 sm:p-9 shadow-sm font-jaini tracking-wide">
-            <h1 class="text-4xl sm:text-5xl font-bold text-[#0d4b75] mb-4 font-jaini">
+            <h1 id="welcomeHeading" class="font-bold text-[#0d4b75] mb-4 font-jaini" style="font-size: 44px; line-height: 1.15;">
               Welcome to ITE Questions
             </h1>
-            <p class="text-gray-800 leading-relaxed mb-4 text-2xl sm:text-[28px] font-jaini">
+            <p id="welcomeBody" class="text-gray-800 leading-relaxed mb-4 font-jaini" style="font-size: 28px;">
               <strong class="font-bold">Get into your teams. Get your answer sheets ready.</strong><br>
               20 questions. Multiple opinions. One correct answer.
             </p>
             <div class="bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r text-emerald-950 font-lexend tracking-normal flex items-center gap-6">
               <div>
-                <p class="font-bold text-emerald-800 text-lg sm:text-xl">Green Team &gt; All Other Teams</p>
-                <p class="text-base sm:text-lg mt-0.5">The only evidence-based conclusion of today's didactics 😊</p>
+                <p id="welcomeGreenTitle" class="font-bold text-emerald-800" style="font-size: 20px;">Green Team &gt; All Other Teams</p>
+                <p id="welcomeGreenSub" class="mt-0.5" style="font-size: 18px;">The only evidence-based conclusion of today's didactics 😊</p>
               </div>
               <!-- Embroidered Slytherin Patch Photo (with click-to-replace fallback) -->
               <label class="relative group cursor-pointer shrink-0" title="Click to choose a custom logo photo from your computer">
@@ -1188,6 +1188,7 @@
       const vignetteEl = document.getElementById('vignetteText');
       vignetteEl.innerHTML = q.vignette;
       vignetteEl.style.fontSize = zoomVignetteFontSizes[textZoomIndex];
+      applyWelcomeZoom();
 
       // Options container visibility & population
       const optionsBoxContainer = document.getElementById('optionsBoxContainer');
@@ -1382,10 +1383,24 @@
     /* =========================================================
        6. TEXT ZOOM & REVERSE COLOR (TV Scaled)
        ========================================================= */
+    function applyWelcomeZoom() {
+      const scales = [1, 1.18, 1.36];
+      const s = scales[textZoomIndex];
+      const heading = document.getElementById('welcomeHeading');
+      const body = document.getElementById('welcomeBody');
+      const greenTitle = document.getElementById('welcomeGreenTitle');
+      const greenSub = document.getElementById('welcomeGreenSub');
+      if (heading) heading.style.fontSize = `${Math.round(44 * s)}px`;
+      if (body) body.style.fontSize = `${Math.round(28 * s)}px`;
+      if (greenTitle) greenTitle.style.fontSize = `${Math.round(20 * s)}px`;
+      if (greenSub) greenSub.style.fontSize = `${Math.round(18 * s)}px`;
+    }
+
     function cycleTextZoom() {
       textZoomIndex = (textZoomIndex + 1) % zoomVignetteFontSizes.length;
       const vignetteEl = document.getElementById('vignetteText');
       vignetteEl.style.fontSize = zoomVignetteFontSizes[textZoomIndex];
+      applyWelcomeZoom();
       
       const labels = document.querySelectorAll('#optionsFieldset label');
       labels.forEach(l => l.style.fontSize = zoomOptionFontSizes[textZoomIndex]);
