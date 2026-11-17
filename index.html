@@ -230,21 +230,11 @@
 
           <!-- Explanations & Rationales Card -->
           <div id="explanationContainer" class="hidden mt-8 p-6 bg-[#f4f8fb] border-2 border-[#1b6399] rounded-lg shadow-md transition-all text-base sm:text-lg max-w-5xl">
-            <div class="flex items-center justify-between mb-4 border-b border-[#c8dbe7] pb-3">
-              <h4 class="font-bold text-fredHeader text-lg sm:text-xl flex items-center space-x-2.5">
-                <svg class="w-6 h-6 text-[#1b6399]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                </svg>
-                <span id="explanationHeaderTitle">Official ABFM Critique & Rationale</span>
-              </h4>
-              <span id="explanationStatusBadge" class="px-3 py-1 text-sm font-bold rounded-full"></span>
-            </div>
-
             <div id="explanationContent" class="text-gray-900 space-y-4 leading-relaxed text-base sm:text-lg">
               <!-- Rationale text -->
             </div>
 
-            <div id="explanationReferences" class="mt-5 pt-3 border-t border-gray-300 text-sm text-gray-600">
+            <div id="explanationReferences" class="mt-5 pt-3 border-t border-gray-300 text-xs text-gray-500">
               <!-- Reference bibliography -->
             </div>
           </div>
@@ -558,7 +548,7 @@
         ],
         correctIndex: 3,
         rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
-          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Under validated clinical decision rules (Canadian CT Head Rule and New Orleans Criteria), <b>age &ge;65 years</b> is an independent high-risk criterion requiring a <b>noncontrast CT of the head</b> after blunt head trauma with loss of consciousness or confusion, even with a GCS of 15.
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Under validated clinical decision rules (<a href="https://www.mdcalc.com/calc/608/canadian-ct-head-injury-trauma-rule" target="_blank" rel="noopener noreferrer" class="text-[#1b6399] underline hover:text-[#0d4b75] font-semibold">Canadian CT Head Rule and New Orleans Criteria</a>), <b>age &ge;65 years</b> is an independent high-risk criterion requiring a <b>noncontrast CT of the head</b> after blunt head trauma with loss of consciousness or confusion, even with a GCS of 15.
         </div>
         <p class="mb-3">Age-related cerebral atrophy stretches cortical bridging veins, predisposing older adults to delayed or occult subdural hematomas despite an initially normal neurologic examination.</p>
         <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
@@ -688,7 +678,7 @@
         ],
         correctIndex: 0,
         rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
-          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Pediatric functional constipation is diagnosed clinically using <b>Rome IV criteria</b> (&ge;2 criteria for &ge;1 month, including &le;2 defecations/week, painful/hard stools, and large-diameter stools that obstruct the toilet) and is treated first-line with daily <b>polyethylene glycol (PEG 3350)</b>.
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Pediatric functional constipation is diagnosed clinically using <a href="https://www.mdcalc.com/calc/10331/rome-iv-diagnostic-criteria-child-functional-constipation" target="_blank" rel="noopener noreferrer" class="text-[#1b6399] underline hover:text-[#0d4b75] font-semibold">Rome IV criteria</a> (&ge;2 criteria for &ge;1 month, including &le;2 defecations/week, painful/hard stools, and large-diameter stools that obstruct the toilet) and is treated first-line with daily <b>polyethylene glycol (PEG 3350)</b>.
         </div>
         <p class="mb-3">Normal growth percentiles, normal basic labs, and absence of systemic symptoms confirm a benign functional etiology.</p>
         <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
@@ -1109,6 +1099,7 @@
     let textZoomIndex = 0;
     const zoomVignetteFontSizes = ['22px', '26px', '30px'];
     const zoomOptionFontSizes = ['20px', '24px', '28px'];
+    const zoomExplanationFontSizes = ['18px', '22px', '26px'];
 
     const teamScores = {
       green: 0,
@@ -1259,24 +1250,12 @@
       const expContainer = document.getElementById('explanationContainer');
       const expContent = document.getElementById('explanationContent');
       const expRefs = document.getElementById('explanationReferences');
-      const expBadge = document.getElementById('explanationStatusBadge');
 
       if (isRevealed) {
         expContainer.classList.remove('hidden');
         expContent.innerHTML = q.rationale;
+        expContent.style.fontSize = zoomExplanationFontSizes[textZoomIndex];
         expRefs.innerHTML = `<b>References:</b><br>${q.references}`;
-
-        const answered = userAnswers[currentIndex];
-        if (answered === undefined) {
-          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-gray-200 text-gray-700';
-          expBadge.textContent = 'Unanswered';
-        } else if (answered === q.correctIndex) {
-          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
-          expBadge.textContent = 'Correct';
-        } else {
-          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-red-100 text-red-800 border border-red-300';
-          expBadge.textContent = 'Incorrect';
-        }
       } else {
         expContainer.classList.add('hidden');
       }
@@ -1404,6 +1383,9 @@
       
       const labels = document.querySelectorAll('#optionsFieldset label');
       labels.forEach(l => l.style.fontSize = zoomOptionFontSizes[textZoomIndex]);
+
+      const expContent = document.getElementById('explanationContent');
+      if (expContent) expContent.style.fontSize = zoomExplanationFontSizes[textZoomIndex];
 
       const indicator = document.getElementById('zoomLevelIndicator');
       indicator.textContent = textZoomIndex === 0 ? 'Text Zoom' : `Zoom (${zoomVignetteFontSizes[textZoomIndex]})`;
