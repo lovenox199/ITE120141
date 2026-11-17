@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBME / ABFM WebFred Practice Examination</title>
+  <!-- Google Fonts: Jaini, Story Script & Lexend -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jaini&family=Lexend:wght@400;600;700&family=Story+Script&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            fredHeader: '#0d4b75',
+            fredHeaderDark: '#093350',
+            fredFooter: '#0b3452',
+            fredFooterDark: '#062033',
+            fredBlueBtn: '#1b6399',
+            fredBlueHover: '#134e7a',
+            fredBorder: '#7d8a93',
+            fredBoxBorder: '#60727f',
+          },
+          fontFamily: {
+            fred: ['Arial', 'Helvetica', 'sans-serif'],
+            jaini: ['"Jaini"', 'cursive', 'sans-serif'],
+            story: ['"Story Script"', 'cursive', 'sans-serif'],
+            lexend: ['"Lexend"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::selection {
+      background-color: #ffeb3b;
+      color: #000;
+    }
+    .user-highlight {
+      background-color: #ffeb3b !important;
+      color: #000000 !important;
+      border-radius: 0 !important;
+      padding: 2px 0 !important;
+      margin: 0 !important;
+      display: inline;
+      line-height: inherit;
+      cursor: pointer;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .user-highlight:hover {
+      outline: 1px dotted #bfa004;
+    }
+    .strike-through {
+      text-decoration: line-through !important;
+      color: #7b8893 !important;
+      opacity: 0.60;
+    }
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e1e7eb;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8fa0ad;
+      border-radius: 2px;
+      border: 2px solid #e1e7eb;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6a7c8a;
+    }
+    .reverse-color {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .reverse-color img, 
+    .reverse-color canvas {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .fred-modal-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+    .fred-radio {
+      accent-color: #0d4b75;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="font-fred bg-white text-[#111] antialiased h-screen w-screen flex flex-col overflow-hidden select-text text-[18px]" id="appRoot">
+
+  <!-- ============================================================== -->
+  <!-- MAIN WORKSPACE: FULL-HEIGHT LEFT SIDEBAR + RIGHT CONTENT AREA   -->
+  <!-- ============================================================== -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- Left Item Selection Sidebar (Extends all the way to the top) -->
+    <aside class="w-14 sm:w-16 bg-[#eef3f7] border-r-2 border-[#b8c5ce] flex flex-col items-center select-none py-1 overflow-y-auto shrink-0 z-30" id="itemSidebar">
+      <div id="itemNumbersList" class="w-full flex flex-col items-center space-y-0.5 pb-2">
+        <!-- Rendered dynamically (1 to 20) -->
+      </div>
+      <div class="mt-auto pt-1 border-t border-[#b8c5ce] w-full text-center text-[11px] text-gray-500 font-bold uppercase">
+        Key
+      </div>
+    </aside>
+
+    <!-- Right Column: Top Toolbar Header + Question Viewport -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- 1. TOP TOOLBAR -->
+      <header class="bg-fredHeader text-white h-[66px] min-h-[66px] flex items-center justify-between px-4 sm:px-6 border-b-2 border-[#093350] shadow-sm select-none z-20">
+        <!-- Left Section: Item Info (Compact Font) & Mark Button -->
+        <div class="flex items-center space-x-4">
+          <div class="text-left leading-tight py-1">
+            <span class="font-semibold tracking-tight text-sm sm:text-base text-gray-100" id="itemCounterDisplay">1 of 20</span>
+          </div>
+
+          <!-- Mark Flag Button -->
+          <button id="markBtn" onclick="toggleMarkCurrentQuestion()" class="flex items-center space-x-2 px-3.5 py-2 bg-[#0a3f65] hover:bg-[#12588a] active:bg-[#072f4c] border border-[#2b7bb5] rounded text-sm sm:text-base font-semibold transition-colors cursor-pointer" title="Flag this item for review">
+            <svg id="markFlagIcon" class="w-5 h-5 fill-white stroke-white" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+            </svg>
+            <span id="markBtnText">Mark</span>
+          </button>
+        </div>
+
+        <!-- Center Section: Navigation Arrows -->
+        <div class="flex items-center space-x-3 sm:space-x-6">
+          <button id="prevBtn" onclick="navigateQuestion(-1)" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-transparent hover:bg-[#12588a] active:bg-[#083655] rounded text-sm sm:text-base font-semibold tracking-wide transition-colors cursor-pointer border border-transparent hover:border-[#2b7bb5]">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+
+          <button id="nextBtn" onclick="navigateQuestion(1)" class="flex items-center space-x-1.5 px-3.5 py-1.5 bg-transparent hover:bg-[#12588a] active:bg-[#083655] rounded text-sm sm:text-base font-semibold tracking-wide transition-colors cursor-pointer border border-transparent hover:border-[#2b7bb5]">
+            <span>Next</span>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Right Section: FRED Standard Utility Buttons -->
+        <div class="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm">
+          <button onclick="toggleModal('labModal')" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="Laboratory Reference Values">
+            <svg class="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+            </svg>
+            <span class="mt-0.5 font-medium leading-none">Lab Values</span>
+          </button>
+
+          <button onclick="toggleModal('notesModal')" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="Scratchpad Notes">
+            <svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            <span class="mt-0.5 font-medium leading-none">Notes</span>
+          </button>
+
+          <button onclick="toggleModal('calcModal')" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="Standard Calculator">
+            <svg class="w-6 h-6 text-sky-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="4" y="2" width="16" height="20" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="8" y1="6" x2="16" y2="6"/>
+              <line x1="8" y1="11" x2="10" y2="11"/>
+              <line x1="14" y1="11" x2="16" y2="11"/>
+              <line x1="8" y1="15" x2="10" y2="15"/>
+              <line x1="14" y1="15" x2="16" y2="15"/>
+            </svg>
+            <span class="mt-0.5 font-medium leading-none">Calculator</span>
+          </button>
+
+          <button onclick="toggleReverseColor()" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="High Contrast Reverse Color">
+            <div class="w-6 h-6 rounded-full border-2 border-white flex overflow-hidden">
+              <div class="w-1/2 bg-white h-full"></div>
+              <div class="w-1/2 bg-[#0d4b75] h-full"></div>
+            </div>
+            <span class="mt-0.5 font-medium leading-none">Reverse Color</span>
+          </button>
+
+          <button onclick="cycleTextZoom()" class="flex flex-col items-center justify-center px-2.5 py-1 hover:bg-[#12588a] rounded border border-transparent hover:border-[#2b7bb5] transition-colors" title="Cycle Font Size">
+            <div class="flex items-baseline space-x-0.5 font-bold font-serif text-[13px] leading-tight">
+              <span class="text-[10px]">A</span>
+              <span class="text-[13px]">A</span>
+              <span class="text-[16px]">A</span>
+            </div>
+            <span class="mt-0.5 font-medium leading-none" id="zoomLevelIndicator">Text Zoom</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Optional Score / Banner Notification Container -->
+      <div id="bannerContainer"></div>
+
+      <!-- Main Question Viewport: Full Real-Estate Utilization -->
+      <main class="flex-1 bg-white overflow-y-auto px-8 py-6 sm:px-12 sm:py-8 flex flex-col" id="questionContainer">
+        <div class="w-full max-w-none">
+
+          <!-- Clinical Vignette Paragraph: Large TV presentation size -->
+          <div id="vignetteText" class="text-gray-950 leading-[1.5] font-normal select-text max-w-6xl" style="font-size: 22px;">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Options Container with Authentic FRED Thin Gray Border -->
+          <div id="optionsBoxContainer" class="mt-8 border border-fredBoxBorder rounded p-5 bg-[#fcfdfe] shadow-xs w-full max-w-3xl">
+            <fieldset id="optionsFieldset" class="space-y-4">
+              <!-- Dynamically populated options -->
+            </fieldset>
+          </div>
+
+          <!-- Action Button: Show Answer / Hide Answer -->
+          <div class="mt-8 flex items-center space-x-5">
+            <button id="showAnswerBtn" onclick="toggleShowAnswer()" class="bg-[#1b6399] hover:bg-[#134e7a] text-white px-6 py-3 rounded text-base sm:text-lg font-semibold tracking-wide shadow-sm border border-[#0d4770] flex items-center space-x-2.5 cursor-pointer transition">
+              <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span id="showAnswerBtnText">Show Answer</span>
+            </button>
+
+            <button id="nextItemBtn" onclick="navigateQuestion(1)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded text-base sm:text-lg font-medium border border-gray-300 flex items-center space-x-2 transition">
+              <span id="nextItemBtnText">Next Item</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Explanations & Rationales Card -->
+          <div id="explanationContainer" class="hidden mt-8 p-6 bg-[#f4f8fb] border-2 border-[#1b6399] rounded-lg shadow-md transition-all text-base sm:text-lg max-w-5xl">
+            <div class="flex items-center justify-between mb-4 border-b border-[#c8dbe7] pb-3">
+              <h4 class="font-bold text-fredHeader text-lg sm:text-xl flex items-center space-x-2.5">
+                <svg class="w-6 h-6 text-[#1b6399]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <span id="explanationHeaderTitle">Official ABFM Critique & Rationale</span>
+              </h4>
+              <span id="explanationStatusBadge" class="px-3 py-1 text-sm font-bold rounded-full"></span>
+            </div>
+
+            <div id="explanationContent" class="text-gray-900 space-y-4 leading-relaxed text-base sm:text-lg">
+              <!-- Rationale text -->
+            </div>
+
+            <div id="explanationReferences" class="mt-5 pt-3 border-t border-gray-300 text-sm text-gray-600">
+              <!-- Reference bibliography -->
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 3. BOTTOM STATUS BAR (TV-Friendly Sizing - 3/4 Compact Height) -->
+  <!-- ============================================================== -->
+  <footer class="bg-fredFooter text-white h-[48px] min-h-[48px] flex items-center justify-between px-4 sm:px-6 text-xs select-none border-t border-[#062033] z-30">
+    <!-- Left: 4-Team Live Scoreboard (Green, Blue, Purple, Orange) -->
+    <div class="flex items-center space-x-2.5 sm:space-x-3.5 overflow-x-auto h-full py-1">
+      <!-- Green Team -->
+      <div class="flex items-center h-full bg-[#062033] border border-emerald-500/80 rounded px-3 space-x-2.5 shadow-xs">
+        <span class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></span>
+        <span class="font-bold text-emerald-300 tracking-wide text-sm">Green</span>
+        <span id="score-green" class="font-mono font-bold text-white text-base sm:text-lg min-w-[2.75rem] text-right">0</span>
+        <div class="flex items-center space-x-1 pl-1.5 border-l border-white/15 h-5/6">
+          <button onclick="updateTeamScore('green', 100)" class="px-2 h-full bg-emerald-700/90 hover:bg-emerald-600 text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Add 100 points">&#9650;</button>
+          <button onclick="updateTeamScore('green', -100)" class="px-2 h-full bg-white/15 hover:bg-red-600/80 text-gray-200 hover:text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Subtract 100 points">&#9660;</button>
+        </div>
+      </div>
+
+      <!-- Blue Team -->
+      <div class="flex items-center h-full bg-[#062033] border border-sky-400/80 rounded px-3 space-x-2.5 shadow-xs">
+        <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
+        <span class="font-bold text-sky-300 tracking-wide text-sm">Blue</span>
+        <span id="score-blue" class="font-mono font-bold text-white text-base sm:text-lg min-w-[2.75rem] text-right">0</span>
+        <div class="flex items-center space-x-1 pl-1.5 border-l border-white/15 h-5/6">
+          <button onclick="updateTeamScore('blue', 100)" class="px-2 h-full bg-sky-700/90 hover:bg-sky-600 text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Add 100 points">&#9650;</button>
+          <button onclick="updateTeamScore('blue', -100)" class="px-2 h-full bg-white/15 hover:bg-red-600/80 text-gray-200 hover:text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Subtract 100 points">&#9660;</button>
+        </div>
+      </div>
+
+      <!-- Purple Team -->
+      <div class="flex items-center h-full bg-[#062033] border border-purple-400/80 rounded px-3 space-x-2.5 shadow-xs">
+        <span class="w-3 h-3 rounded-full bg-purple-400 shrink-0"></span>
+        <span class="font-bold text-purple-300 tracking-wide text-sm">Purple</span>
+        <span id="score-purple" class="font-mono font-bold text-white text-base sm:text-lg min-w-[2.75rem] text-right">0</span>
+        <div class="flex items-center space-x-1 pl-1.5 border-l border-white/15 h-5/6">
+          <button onclick="updateTeamScore('purple', 100)" class="px-2 h-full bg-purple-700/90 hover:bg-purple-600 text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Add 100 points">&#9650;</button>
+          <button onclick="updateTeamScore('purple', -100)" class="px-2 h-full bg-white/15 hover:bg-red-600/80 text-gray-200 hover:text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Subtract 100 points">&#9660;</button>
+        </div>
+      </div>
+
+      <!-- Orange Team -->
+      <div class="flex items-center h-full bg-[#062033] border border-orange-400/80 rounded px-3 space-x-2.5 shadow-xs">
+        <span class="w-3 h-3 rounded-full bg-orange-400 shrink-0"></span>
+        <span class="font-bold text-orange-300 tracking-wide text-sm">Orange</span>
+        <span id="score-orange" class="font-mono font-bold text-white text-base sm:text-lg min-w-[2.75rem] text-right">0</span>
+        <div class="flex items-center space-x-1 pl-1.5 border-l border-white/15 h-5/6">
+          <button onclick="updateTeamScore('orange', 100)" class="px-2 h-full bg-orange-700/90 hover:bg-orange-600 text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Add 100 points">&#9650;</button>
+          <button onclick="updateTeamScore('orange', -100)" class="px-2 h-full bg-white/15 hover:bg-red-600/80 text-gray-200 hover:text-white rounded text-xs font-bold leading-none cursor-pointer flex items-center justify-center" title="Subtract 100 points">&#9660;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: End Block Button (Authentic NBME Circular Indicator Style) -->
+    <div class="flex items-center space-x-3 shrink-0">
+      <span id="koreanAnswerHint" class="text-xs text-blue-200/60 font-semibold select-none"></span>
+      <button onclick="showEndBlockModal()" class="flex flex-col items-center justify-center text-white transition-opacity cursor-pointer group" title="Submit Block & Score">
+        <div class="w-5 h-5 rounded-full bg-red-600 border border-white flex items-center justify-center shadow-xs group-hover:brightness-110 transition-all">
+          <div class="w-2 h-2 rounded-full bg-red-300/80"></div>
+        </div>
+        <span class="text-[10px] sm:text-[11px] font-semibold leading-tight text-white mt-0.5">End Block</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- 4. MODALS & EXAM TOOLS                                         -->
+  <!-- ============================================================== -->
+
+  <!-- A. LAB VALUES MODAL -->
+  <div id="labModal" class="hidden absolute top-14 right-6 w-[94vw] max-w-2xl bg-white border-2 border-fredHeader rounded shadow-2xl z-40 flex flex-col h-[75vh] max-h-[620px] text-xs">
+    <div class="bg-fredHeader text-white px-3 py-2 flex items-center justify-between font-bold cursor-move handle">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+        </svg>
+        <span>Laboratory Reference Values</span>
+      </div>
+      <button onclick="toggleModal('labModal')" class="text-white hover:text-red-300 text-lg leading-none font-bold px-1.5">&times;</button>
+    </div>
+
+    <div class="p-2.5 bg-gray-100 border-b flex flex-wrap gap-2 items-center justify-between">
+      <div class="flex space-x-1" id="labCategoryTabs">
+        <button onclick="filterLabCategory('all')" class="px-2.5 py-1 bg-fredHeader text-white rounded font-medium lab-tab">All</button>
+        <button onclick="filterLabCategory('Serum')" class="px-2.5 py-1 bg-white text-gray-700 border rounded font-medium hover:bg-gray-50 lab-tab">Serum / Chemistries</button>
+        <button onclick="filterLabCategory('Hematology')" class="px-2.5 py-1 bg-white text-gray-700 border rounded font-medium hover:bg-gray-50 lab-tab">Hematology</button>
+        <button onclick="filterLabCategory('CSF / Gases')" class="px-2.5 py-1 bg-white text-gray-700 border rounded font-medium hover:bg-gray-50 lab-tab">Blood Gas / CSF</button>
+        <button onclick="filterLabCategory('Urine')" class="px-2.5 py-1 bg-white text-gray-700 border rounded font-medium hover:bg-gray-50 lab-tab">Urine</button>
+      </div>
+      <div class="relative">
+        <input type="text" id="labSearchInput" oninput="searchLabs(this.value)" placeholder="Search lab test..." class="px-2.5 py-1 border rounded w-44 focus:outline-none focus:ring-1 focus:ring-fredHeader text-xs">
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-3 bg-white" id="labTableContainer">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="bg-gray-100 border-b border-gray-300 text-gray-700 font-bold">
+            <th class="p-2 border-r">Test Name</th>
+            <th class="p-2 border-r">Conventional Units</th>
+            <th class="p-2">SI Units</th>
+          </tr>
+        </thead>
+        <tbody id="labTableBody" class="divide-y divide-gray-200">
+        </tbody>
+      </table>
+    </div>
+    <div class="p-2 bg-gray-50 border-t text-[11px] text-gray-500 flex justify-between items-center">
+      <span>Official USMLE Reference Ranges</span>
+      <button onclick="toggleModal('labModal')" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-800">Close</button>
+    </div>
+  </div>
+
+  <!-- B. CALCULATOR MODAL -->
+  <div id="calcModal" class="hidden absolute top-20 right-20 w-64 bg-[#e9edf0] border-2 border-fredHeader rounded shadow-2xl z-40 flex flex-col text-xs">
+    <div class="bg-fredHeader text-white px-3 py-1.5 flex items-center justify-between font-bold cursor-move">
+      <span>Calculator</span>
+      <button onclick="toggleModal('calcModal')" class="text-white hover:text-red-300 text-lg leading-none font-bold">&times;</button>
+    </div>
+    <div class="p-3">
+      <div class="bg-white border-2 border-gray-400 p-2 rounded mb-3 text-right font-mono text-xl tracking-wider overflow-x-auto shadow-inner text-black font-semibold h-11 flex items-center justify-end" id="calcDisplay">
+        0
+      </div>
+      <div class="grid grid-cols-4 gap-1.5">
+        <button onclick="calcClear()" class="bg-[#c83232] hover:bg-[#a82424] text-white p-2 rounded font-bold shadow-sm">C</button>
+        <button onclick="calcSqrt()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded font-bold shadow-sm">&radic;</button>
+        <button onclick="calcOp('%')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded font-bold shadow-sm">%</button>
+        <button onclick="calcOp('/')" class="bg-[#356f96] hover:bg-[#255577] text-white p-2 rounded font-bold shadow-sm">&divide;</button>
+
+        <button onclick="calcNum('7')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">7</button>
+        <button onclick="calcNum('8')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">8</button>
+        <button onclick="calcNum('9')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">9</button>
+        <button onclick="calcOp('*')" class="bg-[#356f96] hover:bg-[#255577] text-white p-2 rounded font-bold shadow-sm">&times;</button>
+
+        <button onclick="calcNum('4')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">4</button>
+        <button onclick="calcNum('5')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">5</button>
+        <button onclick="calcNum('6')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">6</button>
+        <button onclick="calcOp('-')" class="bg-[#356f96] hover:bg-[#255577] text-white p-2 rounded font-bold shadow-sm">&minus;</button>
+
+        <button onclick="calcNum('1')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">1</button>
+        <button onclick="calcNum('2')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">2</button>
+        <button onclick="calcNum('3')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">3</button>
+        <button onclick="calcOp('+')" class="bg-[#356f96] hover:bg-[#255577] text-white p-2 rounded font-bold shadow-sm">+</button>
+
+        <button onclick="calcNum('0')" class="col-span-2 bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">0</button>
+        <button onclick="calcNum('.')" class="bg-white hover:bg-gray-100 p-2.5 rounded font-bold shadow-sm border border-gray-300 text-sm">.</button>
+        <button onclick="calcEquals()" class="bg-[#0f6b3b] hover:bg-[#094c29] text-white p-2 rounded font-bold shadow-sm text-sm">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. NOTES SCRATCHPAD MODAL -->
+  <div id="notesModal" class="hidden absolute top-24 left-24 w-80 sm:w-96 bg-white border-2 border-fredHeader rounded shadow-2xl z-40 flex flex-col text-xs">
+    <div class="bg-fredHeader text-white px-3 py-1.5 flex items-center justify-between font-bold cursor-move">
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-4 h-4 text-emerald-300" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
+          <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"/>
+        </svg>
+        <span id="notesTitle">Notes (Item 1 / ITE 121)</span>
+      </div>
+      <button onclick="toggleModal('notesModal')" class="text-white hover:text-red-300 text-lg leading-none font-bold">&times;</button>
+    </div>
+    <div class="p-2.5 flex-1 flex flex-col bg-[#fffde7]">
+      <textarea id="notesTextarea" oninput="saveCurrentNote(this.value)" placeholder="Type scratch notes here... Notes are saved for each question." class="w-full h-48 p-2 text-gray-800 bg-transparent border border-amber-200 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono text-xs resize-y"></textarea>
+      <div class="mt-2 flex justify-between items-center text-[10px] text-gray-500">
+        <span>Persistent scratchpad</span>
+        <button onclick="clearCurrentNote()" class="text-red-600 hover:underline">Clear Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. END BLOCK CONFIRMATION / SUMMARY MODAL -->
+  <div id="endBlockModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl border-2 border-fredHeader max-w-md w-full overflow-hidden text-sm">
+      <div class="bg-fredHeader text-white px-4 py-3 flex items-center justify-between font-bold">
+        <span>End of Block Confirmation</span>
+        <button onclick="closeEndBlockModal()" class="text-white hover:text-gray-300 text-lg leading-none">&times;</button>
+      </div>
+      <div class="p-5">
+        <h3 class="font-bold text-gray-900 text-base mb-1">Are you sure you want to end this block?</h3>
+        <p class="text-gray-600 mb-4 text-xs">
+          Summary of your progress across all 20 In-Training Examination questions (Items 121–140):
+        </p>
+
+        <!-- Summary Statistics Grid -->
+        <div class="bg-gray-100 rounded p-3 mb-5 grid grid-cols-3 gap-2 text-center border">
+          <div class="bg-white p-2 rounded shadow-xs">
+            <div class="text-xl font-bold text-blue-700" id="summaryTotalCount">20</div>
+            <div class="text-[10px] text-gray-500 uppercase font-semibold">Total Items</div>
+          </div>
+          <div class="bg-white p-2 rounded shadow-xs">
+            <div class="text-xl font-bold text-emerald-600" id="summaryAnsweredCount">0</div>
+            <div class="text-[10px] text-gray-500 uppercase font-semibold">Answered</div>
+          </div>
+          <div class="bg-white p-2 rounded shadow-xs">
+            <div class="text-xl font-bold text-amber-600" id="summaryFlaggedCount">0</div>
+            <div class="text-[10px] text-gray-500 uppercase font-semibold">Marked</div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 text-xs">
+          <button onclick="closeEndBlockModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-100 font-semibold">
+            Return to Test
+          </button>
+          <button onclick="confirmSubmitExam()" class="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded font-bold shadow-sm">
+            End Block & Score
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT: DATA & INTERACTION LOGIC                           -->
+  <!-- ============================================================== -->
+  <script>
+    /* =========================================================
+       1. WELCOME PAGE + 2025 ABFM IN-TRAINING EXAM ITEMS (121 - 140)
+       ========================================================= */
+    const questions = [
+      {
+        isWelcome: true,
+        iteNumber: 'Intro',
+        vignette: `
+          <div class="bg-[#f4f8fb] border-2 border-[#0d4b75] rounded-lg p-7 sm:p-9 shadow-sm font-jaini tracking-wide">
+            <h1 class="text-4xl sm:text-5xl font-bold text-[#0d4b75] mb-4 font-jaini">
+              Welcome to ITE Questions
+            </h1>
+            <p class="text-gray-800 leading-relaxed mb-4 text-2xl sm:text-[28px] font-jaini">
+              <strong class="font-bold">Get into your teams. Get your answer sheets ready.</strong><br>
+              20 questions. Multiple opinions. One correct answer.
+            </p>
+            <div class="bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r text-emerald-950 font-lexend tracking-normal flex items-center gap-6">
+              <div>
+                <p class="font-bold text-emerald-800 text-lg sm:text-xl">Green Team &gt; All Other Teams</p>
+                <p class="text-base sm:text-lg mt-0.5">The only evidence-based conclusion of today's didactics 😊</p>
+              </div>
+              <!-- Embroidered Slytherin Patch Photo (with click-to-replace fallback) -->
+              <label class="relative group cursor-pointer shrink-0" title="Click to choose a custom logo photo from your computer">
+                <img id="greenTeamLogoImg" src="Slytherin_house_badge.webp" alt="Green Team Crest" class="w-20 h-24 sm:w-24 sm:h-28 object-contain mix-blend-multiply drop-shadow-sm transition-transform group-hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/160x190/ecfdf5/065f46?text=Click+to+Load+Logo'; this.classList.remove('mix-blend-multiply');">
+                <input type="file" accept="image/*" class="hidden" onchange="loadCustomTeamLogo(event)">
+              </label>
+            </div>
+          </div>
+        `,
+        options: [],
+        correctIndex: -1,
+        rationale: '',
+        references: ''
+      },
+      {
+        iteNumber: 121,
+        vignette: "A 48-year-old female comes to your office for a health maintenance examination. She is currently asymptomatic but has a medical history of renal calculi. Laboratory studies reveal a serum calcium level of 12.1 mg/dL (N 8.7–10.2), confirmed by an ionized calcium level.<br><br>Which one of the following would be the most appropriate next step at this time?",
+        options: [
+          "A 24-hour urinary calcium level",
+          "A parathyroid hormone level",
+          "A vitamin D level",
+          "CT of the chest, abdomen, and pelvis"
+        ],
+        correctIndex: 1,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Once hypercalcemia is confirmed with ionized or albumin-corrected calcium, the immediate first diagnostic test is an <b>intact parathyroid hormone (PTH) level</b> to distinguish PTH-mediated (primary hyperparathyroidism) from non-PTH-mediated causes (malignancy, granulomatous disease).
+        </div>
+        <p class="mb-3">Primary hyperparathyroidism is the most common cause of outpatient hypercalcemia and frequently presents asymptomatically with a history of nephrolithiasis.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>24-hour urinary calcium (A) & Vitamin D level (C):</b> Indicated as second-tier workup <i>after</i> an elevated or inappropriately normal PTH confirms PTH-dependent hypercalcemia (to differentiate primary hyperparathyroidism from familial hypocalciuric hypercalcemia [FHH] and evaluate vitamin D deficiency).</li>
+          <li><b>CT of the chest, abdomen, and pelvis (D):</b> Reserved for evaluating occult malignancy only if PTH is suppressed (&lt;20 pg/mL) and PTH-related peptide (PTHrP) is elevated.</li>
+        </ul>`,
+        references: "Sell J, Ramirez S, Partin M. Parathyroid disorders. <i>Am Fam Physician</i>. 2022;105(3):289-298."
+      },
+      {
+        iteNumber: 122,
+        vignette: "A 35-year-old female presents to your office with a 3-day history of right-sided facial weakness. She has flattening of the nasolabial fold and is unable to elevate the right corner of her mouth. She is able to close her right eye and raise her eyebrows.<br><br>Which one of the following would be the most appropriate next step in management?",
+        options: [
+          "Reassurance only",
+          "Prednisone plus valacyclovir (Valtrex)",
+          "MRI of the brain",
+          "Plasmapheresis",
+          "Surgical decompression"
+        ],
+        correctIndex: 2,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Facial paralysis that <b>spares the forehead</b> (preserved eyebrow elevation and eye closure) indicates a <b>central (upper motor neuron) lesion</b> and mandates urgent neuroimaging with <b>MRI of the brain</b> to rule out stroke, demyelination, or mass.
+        </div>
+        <p class="mb-3">The portion of the facial nerve (CN VII) nucleus controlling the upper face receives bilateral corticobulbar innervation; therefore, a unilateral cortical/supranuclear lesion paralyzes only the contralateral lower face.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Reassurance only (A):</b> Dangerous; central facial weakness requires immediate structural evaluation.</li>
+          <li><b>Prednisone plus valacyclovir (B):</b> Standard treatment for peripheral Bell palsy, which involves the <i>entire</i> hemiface including inability to wrinkle the forehead or close the eyelid.</li>
+          <li><b>Plasmapheresis (D) & Surgical decompression (E):</b> Neither is indicated for acute central facial paresis or Bell palsy.</li>
+        </ul>`,
+        references: "Dalrymple SN, Row JH, Gazewood J. Bell palsy: rapid evidence review. <i>Am Fam Physician</i>. 2023;107(4):415-420."
+      },
+      {
+        iteNumber: 123,
+        vignette: "A previously healthy 70-year-old yoga instructor is brought to the emergency department (ED) by her students after falling while practicing yoga. Her students report that she struck her head on the floor and was unresponsive for a few seconds, but recovered quickly. She was slightly confused after the injury, but was able to stand and describe the incident. On initial assessment in the ED, she is holding her head in obvious discomfort and a hematoma is developing on her forehead. She is alert and oriented, with a Glasgow Coma Scale score of 15. On examination she is neurovascularly intact. Her vital signs are normal except for an elevated heart rate of 110 beats/min and a blood pressure of 150/92 mm Hg.<br><br>Which one of the following would be the most appropriate next step in the management of this patient's injury?",
+        options: [
+          "Discharging home with concussion precautions",
+          "Observation in the ED, and acetaminophen",
+          "Observation in the ED, and ibuprofen",
+          "CT of the head"
+        ],
+        correctIndex: 3,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Under validated clinical decision rules (Canadian CT Head Rule and New Orleans Criteria), <b>age &ge;65 years</b> is an independent high-risk criterion requiring a <b>noncontrast CT of the head</b> after blunt head trauma with loss of consciousness or confusion, even with a GCS of 15.
+        </div>
+        <p class="mb-3">Age-related cerebral atrophy stretches cortical bridging veins, predisposing older adults to delayed or occult subdural hematomas despite an initially normal neurologic examination.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Discharging home (A) & Observation alone (B):</b> Unsafe without first excluding intracranial hemorrhage via CT imaging in a patient &ge;65 years old with witnessed loss of consciousness.</li>
+          <li><b>Ibuprofen (C):</b> Contraindicated after acute head trauma due to platelet inhibition and increased risk of intracranial hematoma expansion.</li>
+        </ul>`,
+        references: "Mori K, Abe T, Matsumoto J, Takahashi K, Takeuchi I. Indications for computed tomography in older adult patients with minor head injury in the emergency department. <i>Acad Emerg Med</i>. 2021;28(4):435-443."
+      },
+      {
+        iteNumber: 124,
+        vignette: "A 3-day-old infant presents to your clinic for a routine check-up. The parents report that the infant has been feeding well but has had fewer wet diapers than expected. On examination, the infant appears slightly lethargic with dry skin. You need to assess the hydration status of the infant.<br><br>Which one of the following would be the most reliable clinical sign for assessing dehydration in this 3-day-old infant?",
+        options: [
+          "Capillary refill time",
+          "Decreased urine output",
+          "Dry mucous membranes",
+          "Skin turgor",
+          "Sunken fontanelle"
+        ],
+        correctIndex: 0,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Prolonged <b>capillary refill time (&gt;2 seconds)</b>, along with abnormal skin turgor in older infants and abnormal respiratory pattern, is one of the most reliable objective clinical signs for predicting &ge;5% dehydration (positive likelihood ratio &approx; 4.1).
+        </div>
+        <p class="mb-3">Clinical assessment of neonatal hydration combines objective perfusion checks with accurate weight comparison against birth weight.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Decreased urine output (B):</b> Sensitive, but poorly specific in a 3-day-old newborn whose voiding frequency naturally varies before maternal milk volume fully increases.</li>
+          <li><b>Dry mucous membranes (C) & Sunken fontanelle (E):</b> Subjective and influenced by crying, mouth breathing, and infant positioning during examination.</li>
+          <li><b>Skin turgor (D):</b> Unreliable in 3-day-old neonates due to physiologic neonatal skin elasticity and subcutaneous tissue composition.</li>
+        </ul>`,
+        references: "Steiner MJ, DeWalt DA, Byerley JS. Is this child dehydrated? <i>JAMA</i>. 2004;291(22):2746-2754."
+      },
+      {
+        iteNumber: 125,
+        vignette: "A 16-year-old female presents with her parents because she has been experiencing a loss of interest in her usual activities, trouble sleeping, difficulty concentrating, and low energy over the last month. After a discussion with the patient and her parents, you refer her for cognitive behavioral therapy and start an antidepressant.<br><br>Which one of the following medications is approved by the FDA to treat depression in patients such as this?",
+        options: [
+          "Esketamine nasal spray (Spravato)",
+          "Bupropion",
+          "Fluoxetine (Prozac)",
+          "Venlafaxine"
+        ],
+        correctIndex: 2,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Only <b>two antidepressants</b> carry FDA approval for pediatric major depressive disorder: <b>fluoxetine</b> (approved for ages &ge;8 years) and <b>escitalopram</b> (approved for ages &ge;12 years).
+        </div>
+        <p class="mb-3">First-line treatment for moderate-to-severe adolescent depression combines evidence-based psychotherapy (CBT or interpersonal therapy) with an approved SSRI, alongside close monitoring for suicidality.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Esketamine nasal spray (A):</b> FDA-approved exclusively for adults (&ge;18 years) with treatment-resistant depression.</li>
+          <li><b>Bupropion (B) & Venlafaxine (D):</b> Prescribed off-label in certain pediatric cases, but neither holds FDA approval for adolescent depression (and venlafaxine carries higher rates of behavioral activation/suicidality in youth).</li>
+        </ul>`,
+        references: "Miller L, Campo JV. Depression in adolescents. <i>N Engl J Med</i>. 2021;385(5):445-449."
+      },
+      {
+        iteNumber: 126,
+        vignette: "A 35-year-old patient presents with a 14-day history of a productive cough and green sputum. They report they initially had a fever but that it resolved after a few days. The cough is interfering with their sleep and daily activity, and they have tried cough drops without relief. They have a history of hypothyroidism for which they take levothyroxine (Synthroid), and do not have a history of asthma. They do not smoke, and their immunizations are up to date.<br><br>On examination, the patient is afebrile and has an oxygen saturation of 98% on room air, a heart rate of 82 beats/min, and a blood pressure of 120/82 mm Hg. A lung examination reveals mild rhonchi that clear with cough, and you do not note any wheezing or egophony.<br><br>Which one of the following treatments would be the most effective in reducing this patient's cough?",
+        options: [
+          "An albuterol inhaler (Proventil, Ventolin)",
+          "Amoxicillin/clavulanate (Augmentin)",
+          "Azithromycin (Zithromax)",
+          "Codeine/guaifenesin syrup",
+          "Dextromethorphan (Delsym)"
+        ],
+        correctIndex: 4,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Acute uncomplicated bronchitis is viral in &gt;90% of cases and typically lasts 2–3 weeks. Purulent (green) sputum does <b>not</b> indicate bacterial infection; symptomatic relief with <b>dextromethorphan</b>, guaifenesin, or honey is recommended over antibiotics (SOR B).
+        </div>
+        <p class="mb-3">Normal vital signs, oxygen saturation of 98%, and clear lung fields after coughing exclude pneumonia.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Albuterol inhaler (A):</b> Not recommended in acute bronchitis without underlying asthma or audible wheezing (SOR B).</li>
+          <li><b>Amoxicillin/clavulanate (B) & Azithromycin (C):</b> Antibiotics shorten cough duration by less than half a day (0.46 days) on average while causing significant GI side effects and antibiotic resistance (SOR A).</li>
+          <li><b>Codeine/guaifenesin syrup (D):</b> Clinical trials show codeine is no more effective than placebo for acute bronchitis cough and introduces opioid sedation/misuse risks.</li>
+        </ul>`,
+        references: "Smith SM, Fahey T, Smucny J, Becker LA. Antibiotics for acute bronchitis. <i>Cochrane Database Syst Rev</i>. 2017;6(6):CD000245.<br>Kinkade S, Long NA. Acute bronchitis. <i>Am Fam Physician</i>. 2016;94(7):560-565."
+      },
+      {
+        iteNumber: 127,
+        vignette: "A 20-year-old male presents to the urgent care center for left ankle pain and swelling following an ankle inversion injury that occurred a few hours earlier. A physical examination reveals mild swelling of the left ankle joint.<br><br>Using the Ottawa foot and ankle rules, which one of the following findings, if present, would be an indication for radiography for an acute ankle inversion injury?",
+        options: [
+          "Bone tenderness at the anterior edge of the lateral malleolus",
+          "Bone tenderness at the anterior edge of the medial malleolus",
+          "Bone tenderness at the base of the fourth metatarsal",
+          "Bone tenderness of the navicular bone",
+          "Inability to bear weight on the left foot for at least 10 steps after the injury"
+        ],
+        correctIndex: 3,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Under the <b>Ottawa Foot Rules</b>, foot radiographs are indicated for pain in the midfoot zone plus either <b>bone tenderness at the navicular bone</b>, bone tenderness at the base of the <b>fifth metatarsal</b>, or inability to bear weight for <b>4 steps</b>.
+        </div>
+        <div class="my-3 overflow-x-auto">
+          <table class="w-full text-left border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="p-2 border border-gray-300">Imaging Series</th>
+                <th class="p-2 border border-gray-300">Validated Ottawa Criteria (Any 1 Present)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold">Ankle X-Ray</td>
+                <td class="p-2 border border-gray-300">Posterior edge (distal 6 cm) or tip tenderness of lateral OR medial malleolus; OR inability to walk 4 steps.</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-2 border border-gray-300 font-semibold">Foot X-Ray</td>
+                <td class="p-2 border border-gray-300">Tenderness at <b>navicular bone</b> OR <b>base of 5th metatarsal</b>; OR inability to walk 4 steps.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Anterior malleolar tenderness (A & B):</b> Reflects anterior talofibular or deltoid ligament sprains; the rule specifies the <i>posterior</i> edge or tip.</li>
+          <li><b>Base of the fourth metatarsal (C):</b> Incorrect bone; the rule applies to the base of the <i>fifth</i> metatarsal (Jones/avulsion fracture).</li>
+          <li><b>Inability to bear weight for 10 steps (E):</b> The validated threshold is <b>4 steps</b> both immediately and in the emergency/urgent care department.</li>
+        </ul>`,
+        references: "Silver S, Williams E, Plunkett ML. Common foot fractures. <i>Am Fam Physician</i>. 2024;109(2):119-129."
+      },
+      {
+        iteNumber: 128,
+        vignette: "A generally healthy 13-year-old male presents with his parents because they are concerned that he has very large-volume stools that clog the toilet. The patient says that he averages fewer than 2 bowel movements per week and they are sometimes painful. He does not have any abdominal pain and has not seen any blood in his stools. Examination findings are unremarkable. His height, weight, and BMI percentiles have remained steady for years. A CBC, comprehensive metabolic panel, ferritin level, and TSH level are all normal. An abdominal x-ray is normal.<br><br>Which one of the following would be the most appropriate next step?",
+        options: [
+          "Polyethylene glycol (MiraLAX) daily",
+          "Probiotics daily",
+          "Magnetic resonance enterography",
+          "Colonoscopy"
+        ],
+        correctIndex: 0,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Pediatric functional constipation is diagnosed clinically using <b>Rome IV criteria</b> (&ge;2 criteria for &ge;1 month, including &le;2 defecations/week, painful/hard stools, and large-diameter stools that obstruct the toilet) and is treated first-line with daily <b>polyethylene glycol (PEG 3350)</b>.
+        </div>
+        <p class="mb-3">Normal growth percentiles, normal basic labs, and absence of systemic symptoms confirm a benign functional etiology.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Probiotics daily (B):</b> Clinical trials demonstrate insufficient evidence to support probiotics for pediatric functional constipation.</li>
+          <li><b>MR enterography (C) & Colonoscopy (D):</b> Invasive and costly tests are not indicated without red flag signs (e.g., hematochezia, weight loss, linear growth deceleration, or abnormal labs).</li>
+        </ul>`,
+        references: "Mulhem E, Khondoker F, Kandiah S. Constipation in children and adolescents: evaluation and treatment. <i>Am Fam Physician</i>. 2022;105(5):469-478."
+      },
+      {
+        iteNumber: 129,
+        vignette: "A 45-year-old male sees you for routine follow-up of diabetes mellitus. He smokes 1 pack of cigarettes per day and does not have any other medical conditions. His diabetes is well controlled on liraglutide (Victoza) and metformin. He has an LDL-cholesterol level of 120 mg/dL, an HDL-cholesterol level of 55 mg/dL, and a triglyceride level of 300 mg/dL. His 10-year atherosclerotic cardiovascular disease risk is 8.2%.<br><br>According to 2018 guidelines from the American College of Cardiology/American Heart Association, the most appropriate recommendation for this patient would be",
+        options: [
+          "atorvastatin (Lipitor), 40 mg daily",
+          "ezetimibe (Zetia), 10 mg daily",
+          "fenofibrate, 160 mg daily",
+          "pravastatin, 20 mg daily",
+          "simvastatin (Zocor), 40 mg daily"
+        ],
+        correctIndex: 0,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Adults aged 40–75 with diabetes and LDL-C &ge;70 mg/dL require at least moderate-intensity statin therapy, but the presence of <b>multiple ASCVD risk enhancers</b> (active smoking + 10-year ASCVD risk &ge;7.5%) upgrades the recommendation to a <b>high-intensity statin</b> (<b>atorvastatin 40–80 mg</b> or rosuvastatin 20–40 mg).
+        </div>
+        <div class="my-3 overflow-x-auto">
+          <table class="w-full text-left border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="p-2 border border-gray-300">Statin Intensity</th>
+                <th class="p-2 border border-gray-300">Expected LDL Drop</th>
+                <th class="p-2 border border-gray-300">Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold text-emerald-800">High-Intensity</td>
+                <td class="p-2 border border-gray-300">&ge;50%</td>
+                <td class="p-2 border border-gray-300"><b>Atorvastatin 40–80 mg</b>, Rosuvastatin 20–40 mg</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-2 border border-gray-300 font-semibold">Moderate-Intensity</td>
+                <td class="p-2 border border-gray-300">30%–49%</td>
+                <td class="p-2 border border-gray-300">Atorvastatin 10–20 mg, Rosuvastatin 5–10 mg, Simvastatin 20–40 mg, Pravastatin 40–80 mg</td>
+              </tr>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold">Low-Intensity</td>
+                <td class="p-2 border border-gray-300">&lt;30%</td>
+                <td class="p-2 border border-gray-300">Pravastatin 10–20 mg, Simvastatin 10 mg</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Ezetimibe (B) & Fenofibrate (C):</b> Not first-line monotherapies for primary cardiovascular risk reduction (and triglycerides &lt;500 mg/dL do not require immediate fibrate therapy for pancreatitis prevention).</li>
+          <li><b>Pravastatin 20 mg (D) & Simvastatin 40 mg (E):</b> Represent low- and moderate-intensity regimens, providing insufficient LDL reduction for a diabetic patient with multiple ASCVD risk enhancers.</li>
+        </ul>`,
+        references: "Grundy SM, Stone NJ, Bailey AL, et al. 2018 AHA/ACC guideline on the management of blood cholesterol. <i>Circulation</i>. 2019;139(25):e1082-e1143."
+      },
+      {
+        iteNumber: 130,
+        vignette: "A 37-year-old male comes to the primary care clinic with a several-month history of worsening paresthesia in his right foot. He says that he sometimes has numbness and a hot sensation in his feet and has difficulty using the pedals of his car. Sometimes, he has pain that wakes him up at night but eases when he walks around the room.<br><br>He has no significant past medical history but did sustain a severe right ankle sprain about 1 year ago. His vital signs are unremarkable. Examination of the ankle reveals pain along the medial malleolus and a positive Tinel sign at the ankle. An x-ray of the ankle is unremarkable.<br><br>Which one of the following is the most likely diagnosis?",
+        options: [
+          "Achilles tendinopathy",
+          "Haglund deformity",
+          "Heel pad syndrome",
+          "Plantar fasciitis",
+          "Tarsal tunnel syndrome"
+        ],
+        correctIndex: 4,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> <b>Tarsal tunnel syndrome</b> is an entrapment neuropathy of the <b>posterior tibial nerve</b> beneath the flexor retinaculum behind the medial malleolus, frequently triggered by prior ankle trauma and confirmed clinically by a <b>positive Tinel sign</b> at the medial ankle.
+        </div>
+        <p class="mb-3">Patients characteristically experience burning, numbness, and nocturnal paresthesias radiating along the plantar surface of the foot and toes.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Achilles tendinopathy (A):</b> Presents with posterior ankle stiffness and pain localized 2–6 cm proximal to the calcaneal insertion without plantar paresthesias.</li>
+          <li><b>Haglund deformity (B):</b> A painful bony prominence ("pump bump") on the posterosuperior calcaneus visible on lateral ankle radiographs.</li>
+          <li><b>Heel pad syndrome (C):</b> Deep, bruise-like pain directly beneath the central calcaneus caused by fat pad atrophy or repetitive impact.</li>
+          <li><b>Plantar fasciitis (D):</b> Sharp pain at the medial calcaneal tuberosity that is worst with the <i>first steps in the morning</i> and lacks neurologic signs.</li>
+        </ul>`,
+        references: "Rodriguez-Merchan EC, Moracia-Ochagavia I. Tarsal tunnel syndrome: current rationale, indications and results. <i>EFORT Open Rev</i>. 2021;6(12):1140-1147."
+      },
+      {
+        iteNumber: 131,
+        vignette: "A 36-year-old female comes to your office for a health maintenance examination. She mentions that she engages in amateur rifle target shooting matches.<br><br>Which one of the following would be the most appropriate advice concerning this patient's physical safety?",
+        options: [
+          "She should wear electronic hearing protection that amplifies quiet sounds",
+          "She should wear noise-canceling headphones",
+          "She should wear loose-fitting clothing",
+          "She should wear her regular glasses so that she has eye protection"
+        ],
+        correctIndex: 0,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Gunfire produces impulse peak noise &gt;140 dB (capable of immediate sensorineural hearing loss). <b>Electronic hearing protection</b> provides high passive noise reduction (28–31 dB) during shots while safely amplifying quiet range safety commands.
+        </div>
+        <p class="mb-3">Proper ballistic eye protection (ANSI Z87.1 rated polycarbonate lenses) and high-collar fitted clothing are also essential firearm range safety practices.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Noise-canceling headphones (B):</b> Active noise cancellation targets continuous low-frequency ambient hum and reacts too slowly to attenuate millisecond ballistic impulse spikes.</li>
+          <li><b>Loose-fitting clothing (C):</b> Creates a burn and safety hazard because hot ejected brass shell casings can lodge inside open collars or sleeves.</li>
+          <li><b>Regular glasses (D):</b> Standard prescription frames lack side shields and shatter resistance against ricocheting lead fragments or malfunctioning firearm parts.</li>
+        </ul>`,
+        references: "Carter PM, Cunningham RM. Clinical approaches to the prevention of firearm-related injury. <i>N Engl J Med</i>. 2024;391(10):926-940."
+      },
+      {
+        iteNumber: 132,
+        vignette: "A 66-year-old male presents to your office with a 2-hour history of discomfort in the midsternal area that began while taking a walk earlier today. He says that he feels 90% better. He had a Welcome to Medicare visit 1 year ago, in which an EKG was normal. You order an EKG today.<br><br>Which one of the following EKG findings, if present in this patient, should prompt urgent transport to the emergency department?",
+        options: [
+          "First-degree atrioventricular block",
+          "Frequent PVCs",
+          "Left bundle branch block",
+          "Sinus tachycardia",
+          "Voltage criteria for left ventricular hypertrophy"
+        ],
+        correctIndex: 2,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> In a patient with acute or recent exertional chest discomfort and a previously normal EKG, a <b>new left bundle branch block (LBBB)</b> is a high-risk marker of acute proximal LAD occlusion/myocardial infarction and mandates immediate EMS transport to the emergency department.
+        </div>
+        <p class="mb-3">Even when symptoms have largely subsided, an ischemic EKG change in an outpatient setting requires emergent cardiac biomarker testing and reperfusion evaluation.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>First-degree AV block (A), Frequent PVCs (B), Sinus tachycardia (D), & LVH voltage criteria (E):</b> Nonspecific findings that do not indicate acute transmural myocardial ischemia or warrant emergent ambulance transfer in a hemodynamically stable patient.</li>
+        </ul>`,
+        references: "McConaghy JR, Sharma M, Patel H. Acute chest pain in adults: outpatient evaluation. <i>Am Fam Physician</i>. 2020;102(12):721-727."
+      },
+      {
+        iteNumber: 133,
+        vignette: "A generally healthy 56-year-old female sees you for follow-up of pneumonia diagnosed in the emergency department (ED). A chest x-ray performed in the ED showed a left lower lobe infiltrate and several compression fractures involving the thoracic vertebrae. A DXA scan performed 7 months ago showed a T-score of -1.9. Her daily medications include a multivitamin; calcium, 1000 mg; and vitamin D3 (cholecalciferol), 800 IU. Today she feels well and has no concerns.<br><br>This patient would be most likely to benefit from therapy for which one of the following conditions?",
+        options: [
+          "Osteopenia",
+          "Osteoporosis",
+          "Spondylolisthesis",
+          "Spondylolysis"
+        ],
+        correctIndex: 1,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Postmenopausal <b>osteoporosis</b> is diagnosed clinically by the presence of a low-trauma <b>fragility fracture</b> (such as vertebral compression fractures) <b>regardless of DXA T-score</b>, superseding a T-score in the osteopenic range (-1.0 to -2.49).
+        </div>
+        <p class="mb-3">Because silent thoracic vertebral fractures carry a markedly elevated risk for future hip and spine fractures, pharmacologic therapy (e.g., oral bisphosphonate) should be initiated immediately.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Osteopenia (A):</b> Although her T-score (-1.9) falls numerically within the osteopenic range, fragility fractures reclassify her diagnosis to established osteoporosis requiring medical therapy.</li>
+          <li><b>Spondylolisthesis (C):</b> Anterior slippage of one vertebral body over another, typically degenerative in older adults.</li>
+          <li><b>Spondylolysis (D):</b> A stress fracture of the pars interarticularis of the lumbar spine, classically seen in adolescent athletes performing repetitive hyperextension.</li>
+        </ul>`,
+        references: "Walker MD, Shane E. Postmenopausal osteoporosis. <i>N Engl J Med</i>. 2023;389(21):1979-1991."
+      },
+      {
+        iteNumber: 134,
+        vignette: "A gravida 2 para 1 at 28 weeks' gestation presents with an episode of second-trimester bleeding that spontaneously resolved. She has not had any prenatal laboratory studies during either of her pregnancies. Ultrasonography today shows a healthy fetus and a small placental abruption.<br><br>Which one of the following would be most important to order at this time?",
+        options: [
+          "An antiphospholipid antibody profile",
+          "An HIV test",
+          "An Rh factor test",
+          "A toxoplasmosis antibody test",
+          "A urine toxicology screen for cocaine"
+        ],
+        correctIndex: 2,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> In any pregnant patient presenting with antepartum bleeding (including placental abruption) and unknown blood type, ordering an <b>ABO/Rh(D) factor test</b> is most time-critical because <b>Rho(D) immune globulin (RhoGAM)</b> must be administered within <b>72 hours</b> if she is Rh-negative.
+        </div>
+        <p class="mb-3">Fetomaternal hemorrhage during abruption can trigger maternal anti-D alloimmunization, risking severe hemolytic disease of the fetus and newborn.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Antiphospholipid antibody profile (A):</b> Reserved for recurrent early pregnancy losses (&ge;3), unexplained fetal demise &ge;10 weeks, or thromboembolism.</li>
+          <li><b>HIV test (B):</b> Essential routine prenatal screening since she had no prior labs, but less immediately time-sensitive than Rh typing for RhoGAM administration.</li>
+          <li><b>Toxoplasmosis antibody test (D):</b> Not routinely screened in the U.S. unless fetal ultrasound shows characteristic intracranial calcifications/ventriculomegaly or maternal exposure is suspected.</li>
+          <li><b>Urine toxicology screen (E):</b> While cocaine is a risk factor for abruption, toxicology results will not alter acute obstetric management as urgently as Rh status.</li>
+        </ul>`,
+        references: "American College of Obstetricians and Gynecologists. ACOG Practice Bulletin No. 181: prevention of Rh D alloimmunization. <i>Obstet Gynecol</i>. 2017;130(2):e57-e70."
+      },
+      {
+        iteNumber: 135,
+        vignette: "A generally healthy 50-year-old nurse presents to your clinic 1 day after sustaining an accidental needlestick containing the blood of a person with active hepatitis B virus infection who has not yet begun treatment. Your patient completed the hepatitis B (HepB) vaccine series at age 30 before beginning his first nursing job. Hepatitis serologies drawn yesterday at his place of employment were positive for hepatitis B surface antibody (>10 mIU/mL).<br><br>Which one of the following would be recommended for this patient?",
+        options: [
+          "No additional vaccination",
+          "Hepatitis B immune globulin (HBIG) only",
+          "Recombinant HepB vaccine only",
+          "Both HBIG and recombinant HepB vaccine"
+        ],
+        correctIndex: 0,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> A health care worker with a documented complete HepB vaccine series and a protective <b>anti-HBs titer &ge;10 mIU/mL</b> has durable immunologic memory and requires <b>no postexposure prophylaxis</b> (neither HBIG nor booster vaccine) following an HBsAg-positive needlestick.
+        </div>
+        <div class="my-3 overflow-x-auto">
+          <table class="w-full text-left border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="p-2 border border-gray-300">Exposed Worker Status</th>
+                <th class="p-2 border border-gray-300">Postexposure Management (HBsAg+ Source)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold text-emerald-800">Vaccinated + Anti-HBs &ge;10 mIU/mL</td>
+                <td class="p-2 border border-gray-300"><b>No treatment needed</b> (immune)</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-2 border border-gray-300 font-semibold">Unvaccinated or Incomplete Series</td>
+                <td class="p-2 border border-gray-300">HBIG &times; 1 + complete HepB vaccine series</td>
+              </tr>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold">Documented Non-Responder (2 series)</td>
+                <td class="p-2 border border-gray-300">HBIG &times; 2 (1 month apart)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>HBIG and/or HepB vaccine (B, C, D):</b> Unnecessary in documented vaccine responders; immunologic memory prevents clinical HBV infection even if titers wane over decades, and here his titer remains actively &gt;10 mIU/mL.</li>
+        </ul>`,
+        references: "Schillie S, Vellozzi C, Reingold A, et al. Prevention of hepatitis B virus infection in the United States. <i>MMWR Recomm Rep</i>. 2018;67(1):1-31."
+      },
+      {
+        iteNumber: 136,
+        vignette: "A 20-year-old female presents for a routine health maintenance examination and has no medical concerns today. She does not have a history of sexual activity, and screenings for alcohol and substance use, intimate partner violence, anxiety, depression, and suicidality are negative. An examination reveals fair skin, an elevated BMI of 31 kg/m², and normal blood pressure.<br><br>According to the U.S. Preventive Services Task Force, you should recommend screening for which one of the following?",
+        options: [
+          "Cervical cancer",
+          "Chlamydia",
+          "Diabetes mellitus",
+          "HIV",
+          "Skin cancer"
+        ],
+        correctIndex: 3,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> The USPSTF recommends universal one-time opt-out <b>HIV screening</b> for all adolescents and adults aged <b>15 to 65 years</b> (Grade A), regardless of reported sexual activity.
+        </div>
+        <div class="my-3 overflow-x-auto">
+          <table class="w-full text-left border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="p-2 border border-gray-300">Condition</th>
+                <th class="p-2 border border-gray-300">USPSTF Guideline & Age Threshold</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold text-emerald-800">HIV Infection</td>
+                <td class="p-2 border border-gray-300"><b>Ages 15–65</b> (Grade A) &mdash; indicated now at age 20</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-2 border border-gray-300 font-semibold">Cervical Cancer</td>
+                <td class="p-2 border border-gray-300">Starts at <b>age 21</b> (Grade A); Grade D (do not screen) under age 21</td>
+              </tr>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold">Chlamydia / Gonorrhea</td>
+                <td class="p-2 border border-gray-300"><b>Sexually active</b> females &le;24 years (Grade B) &mdash; patient is not sexually active</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-2 border border-gray-300 font-semibold">Prediabetes / Type 2 DM</td>
+                <td class="p-2 border border-gray-300"><b>Ages 35–70</b> with BMI &ge;25 kg/m² (Grade B) &mdash; offer behavioral weight loss now</td>
+              </tr>
+              <tr class="bg-white">
+                <td class="p-2 border border-gray-300 font-semibold">Skin Cancer</td>
+                <td class="p-2 border border-gray-300">Visual skin exam is <b>Grade I</b> (insufficient evidence); counsel on UV protection (Grade B)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`,
+        references: "Final recommendation statement: human immunodeficiency virus (HIV) infection: screening. <i>US Preventive Services Task Force</i>. Updated June 11, 2019."
+      },
+      {
+        iteNumber: 137,
+        vignette: "A 65-year-old male presents to your clinic with symptoms of flashing lights and increased floaters in his left eye. He does not have any pain, and he has no past medical history. His vital signs are normal. His visual acuity is at baseline when wearing his glasses, and you note a visual field defect on the left.<br><br>Which one of the following is the most likely diagnosis?",
+        options: [
+          "Migraine with aura",
+          "Central retinal artery occlusion",
+          "Retinal detachment",
+          "Globe rupture",
+          "Acute ischemic stroke"
+        ],
+        correctIndex: 2,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> The classic triad of <b>photopsias</b> (flashing lights), acute shower of <b>floaters</b>, and a dark peripheral <b>curtain/visual field defect</b> indicates <b>retinal detachment</b>, a true ophthalmic emergency requiring same-day dilated fundoscopy and surgical repair.
+        </div>
+        <p class="mb-3">Visual acuity remains intact initially until the detachment progresses to involve the macula.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Migraine with aura (A):</b> Presents with transient (20–30 min), bilateral scintillating scotomas typically followed by headache; new-onset migraine at age 65 is rare.</li>
+          <li><b>Central retinal artery occlusion (B):</b> Causes sudden, profound, painless monocular blindness with an afferent pupillary defect and cherry-red macula.</li>
+          <li><b>Globe rupture (D):</b> Occurs following severe blunt or penetrating ocular trauma.</li>
+          <li><b>Acute ischemic stroke (E):</b> Produces homonymous hemianopia across <i>both</i> eyes without unilateral photopsias or vitreous floaters.</li>
+        </ul>`,
+        references: "Gelston CD, Deitz GA. Eye emergencies. <i>Am Fam Physician</i>. 2020;102(9):539-545."
+      },
+      {
+        iteNumber: 138,
+        vignette: "A 46-year-old male presents for an acute visit due to a 2-week history of low back pain. He was moving furniture when the pain started, and he felt a pop in his right lower back area. The pain is severe enough that it keeps him from standing up straight and is causing him trouble with sleeping. He does not have fever or chills, numbness, paresthesia, or weakness in his lower extremities. He has no radicular pain on a straight leg-raising test. He went to a chiropractor who did x-rays and told him he needed to get an MRI.<br><br>Which one of the following, if present, would be an indication for advanced imaging?",
+        options: [
+          "Current cigarette use",
+          "Current intravenous drug use",
+          "Disrupted sleep due to nocturnal pain",
+          "Restricted posture due to pain",
+          "New urinary retention"
+        ],
+        correctIndex: 4,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> <b>New-onset urinary retention</b> (often with overflow incontinence, saddle anesthesia, or progressive lower-extremity motor deficits) is a hallmark red flag for <b>cauda equina syndrome</b>, necessitating emergent lumbosacral MRI and surgical decompression.
+        </div>
+        <p class="mb-3">In acute mechanical low back pain (&lt;6 weeks) without red flags, Choosing Wisely and VA/DoD guidelines advise against routine MRI because early imaging increases unnecessary surgeries, opioid use, and health care costs without improving outcomes.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Current cigarette use (A) & Current IV drug use (B):</b> Risk factors for malignancy or spinal epidural abscess, respectively, but neither is a solitary indication for immediate MRI in the absence of systemic symptoms (fever, chills, unexplained weight loss, or known cancer history).</li>
+          <li><b>Disrupted sleep (C) & Restricted posture (D):</b> Common features of severe mechanical muscle spasm/strain rather than structural neurologic compromise.</li>
+        </ul>`,
+        references: "VA/DoD Clinical Practice Guideline for the Diagnosis and Treatment of Low Back Pain. Version 3.0. <i>US Government Printing Office</i>; 2022."
+      },
+      {
+        iteNumber: 139,
+        vignette: "How long after intranasal administration does naloxone (Narcan) reach peak plasma concentrations?",
+        options: [
+          "Immediately",
+          "30-60 seconds",
+          "3-5 minutes",
+          "15-30 minutes",
+          "1-2 hours"
+        ],
+        correctIndex: 3,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> Intranasal naloxone reaches <b>peak plasma concentration (T<sub>max</sub>) in 15–30 minutes</b>, although clinical reversal of respiratory depression typically begins within <b>2–5 minutes</b>.
+        </div>
+        <p class="mb-3">Because naloxone has a relatively short elimination half-life (~1.5–2 hours) compared to many sustained-release or synthetic opioids, patients require continuous monitoring for recurrent respiratory depression.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Immediately (A) & 30–60 seconds (B):</b> Characteristic of intravenous administration, not intranasal mucosal absorption.</li>
+          <li><b>3–5 minutes (C):</b> Reflects the typical <i>clinical onset of action</i> (restoration of spontaneous respirations), not peak plasma concentration.</li>
+          <li><b>1–2 hours (E):</b> Approximates naloxone's elimination half-life rather than its time to peak serum concentration.</li>
+        </ul>`,
+        references: "Ortega R, Nozari A, Baker W, Surani S, Edwards M. Intranasal naloxone administration. <i>N Engl J Med</i>. 2021;384(12):e44."
+      },
+      {
+        iteNumber: 140,
+        vignette: "A 24-year-old male presents for evaluation of a bulge in his groin. He reports that it is larger at the end of the day and with straining but says it often goes away when he lies down. He reports a mild dull ache that limits his ability to lift lumber at work. On examination there is no obvious bulge in the inguinal area. When the patient bears down, a bulge becomes apparent.<br><br>Which one of the following is the most appropriate next step?",
+        options: [
+          "Inguinal ultrasonography",
+          "Scrotal ultrasonography",
+          "Abdominal and pelvic CT",
+          "Physical therapy",
+          "Surgical referral"
+        ],
+        correctIndex: 4,
+        rationale: `<div class="bg-blue-50 border-l-4 border-[#0d4b75] p-3.5 rounded-r mb-4 text-gray-900">
+          <span class="font-bold text-[#0d4b75]">Board Pearl:</span> An <b>inguinal hernia</b> that is clinically palpable or visible on Valsalva requires <b>no diagnostic imaging</b>; when it causes pain or impairs occupational function, direct <b>surgical referral</b> for hernia repair is the appropriate next step.
+        </div>
+        <p class="mb-3">Watchful waiting is an acceptable option only for minimally symptomatic or asymptomatic reducible inguinal hernias in men.</p>
+        <p class="font-bold text-gray-900 mb-1.5">Why the Other Choices Are Incorrect:</p>
+        <ul class="list-disc pl-6 space-y-1.5 text-gray-800">
+          <li><b>Inguinal ultrasonography (A), Scrotal ultrasonography (B), & CT scan (C):</b> Unnecessary low-value testing when the hernia is clearly demonstrated on physical exam (reserved only for occult groin pain without a palpable/visible bulge).</li>
+          <li><b>Physical therapy (D):</b> Does not repair a fascial defect in the abdominal wall and will not resolve a symptomatic inguinal hernia.</li>
+        </ul>`,
+        references: "Shakil A, Aparicio K, Barta E, Munez K. Inguinal hernias: diagnosis and management. <i>Am Fam Physician</i>. 2020;102(8):487-492.<br>Liu N, Prout TM, Xu Y, et al. Unnecessary use of radiology studies in the diagnosis of inguinal hernias. <i>Surg Endosc</i>. 2021;35(8):4444-4451."
+      }
+    ];
+
+    /* =========================================================
+       2. OFFICIAL USMLE LABORATORY REFERENCE VALUES
+       ========================================================= */
+    const labValues = [
+      { category: 'Serum', name: 'Sodium', conv: '136–145 mEq/L', si: '136–145 mmol/L' },
+      { category: 'Serum', name: 'Potassium', conv: '3.5–5.0 mEq/L', si: '3.5–5.0 mmol/L' },
+      { category: 'Serum', name: 'Chloride', conv: '98–106 mEq/L', si: '98–106 mmol/L' },
+      { category: 'Serum', name: 'Bicarbonate (HCO3)', conv: '22–28 mEq/L', si: '22–28 mmol/L' },
+      { category: 'Serum', name: 'Blood Urea Nitrogen (BUN)', conv: '7–20 mg/dL', si: '2.5–7.1 mmol/L' },
+      { category: 'Serum', name: 'Creatinine', conv: '0.6–1.2 mg/dL', si: '53–106 µmol/L' },
+      { category: 'Serum', name: 'Glucose (Fasting)', conv: '70–100 mg/dL', si: '3.9–5.6 mmol/L' },
+      { category: 'Serum', name: 'Calcium', conv: '8.5–10.5 mg/dL', si: '2.1–2.6 mmol/L' },
+      { category: 'Serum', name: 'Magnesium', conv: '1.5–2.4 mg/dL', si: '0.75–1.2 mmol/L' },
+      { category: 'Serum', name: 'Phosphate (Inorganic)', conv: '3.0–4.5 mg/dL', si: '0.97–1.45 mmol/L' },
+      { category: 'Serum', name: 'Parathyroid Hormone (PTH, Intact)', conv: '10–65 pg/mL', si: '10–65 ng/L' },
+      { category: 'Serum', name: 'TSH', conv: '0.4–4.0 µU/mL', si: '0.4–4.0 mU/L' },
+      { category: 'Serum', name: 'Free T4', conv: '0.8–1.8 ng/dL', si: '10–23 pmol/L' },
+      { category: 'Serum', name: 'AST (SGOT)', conv: '10–40 U/L', si: '0.17–0.68 µkat/L' },
+      { category: 'Serum', name: 'ALT (SGPT)', conv: '7–56 U/L', si: '0.12–0.95 µkat/L' },
+      { category: 'Serum', name: 'Alkaline Phosphatase', conv: '44–147 U/L', si: '0.75–2.5 µkat/L' },
+      { category: 'Serum', name: 'Total Bilirubin', conv: '0.3–1.2 mg/dL', si: '5.1–20.5 µmol/L' },
+      { category: 'Serum', name: 'Albumin', conv: '3.5–5.5 g/dL', si: '35–55 g/L' },
+      { category: 'Serum', name: 'Total Cholesterol', conv: '<200 mg/dL', si: '<5.2 mmol/L' },
+      { category: 'Serum', name: 'HDL Cholesterol', conv: '>40 mg/dL', si: '>1.0 mmol/L' },
+      { category: 'Serum', name: 'LDL Cholesterol', conv: '<100 mg/dL', si: '<2.6 mmol/L' },
+      { category: 'Serum', name: 'Triglycerides', conv: '<150 mg/dL', si: '<1.7 mmol/L' },
+
+      { category: 'Hematology', name: 'Hemoglobin (Male)', conv: '13.5–17.5 g/dL', si: '135–175 g/L' },
+      { category: 'Hematology', name: 'Hemoglobin (Female)', conv: '12.0–15.5 g/dL', si: '120–155 g/L' },
+      { category: 'Hematology', name: 'Hematocrit (Male)', conv: '41%–50%', si: '0.41–0.50' },
+      { category: 'Hematology', name: 'Hematocrit (Female)', conv: '36%–44%', si: '0.36–0.44' },
+      { category: 'Hematology', name: 'Platelet Count', conv: '150,000–450,000/mm³', si: '150–450 × 10⁹/L' },
+      { category: 'Hematology', name: 'White Blood Cell (WBC)', conv: '4,500–11,000/mm³', si: '4.5–11.0 × 10⁹/L' },
+      { category: 'Hematology', name: 'Prothrombin Time (PT)', conv: '11–13.5 sec', si: '11–13.5 sec' },
+      { category: 'Hematology', name: 'INR', conv: '0.8–1.1 (therapeutic 2.0–3.0)', si: '0.8–1.1' },
+      { category: 'Hematology', name: 'aPTT', conv: '25–35 sec', si: '25–35 sec' },
+      { category: 'Hematology', name: 'ESR (Westergren, Male)', conv: '0–15 mm/hr', si: '0–15 mm/hr' },
+      { category: 'Hematology', name: 'ESR (Westergren, Female)', conv: '0–20 mm/hr', si: '0–20 mm/hr' },
+
+      { category: 'CSF / Gases', name: 'Arterial Blood pH', conv: '7.35–7.45', si: '7.35–7.45' },
+      { category: 'CSF / Gases', name: 'PaCO2', conv: '35–45 mm Hg', si: '4.7–6.0 kPa' },
+      { category: 'CSF / Gases', name: 'PaO2', conv: '80–100 mm Hg', si: '10.6–13.3 kPa' },
+      { category: 'CSF / Gases', name: 'CSF Opening Pressure', conv: '70–180 mm H2O', si: '70–180 mm H2O' },
+      { category: 'CSF / Gases', name: 'CSF Glucose', conv: '40–70 mg/dL', si: '2.2–3.9 mmol/L' },
+      { category: 'CSF / Gases', name: 'CSF Protein', conv: '15–45 mg/dL', si: '0.15–0.45 g/L' },
+
+      { category: 'Urine', name: 'Specific Gravity', conv: '1.002–1.030', si: '1.002–1.030' },
+      { category: 'Urine', name: 'Urine pH', conv: '4.6–8.0', si: '4.6–8.0' },
+      { category: 'Urine', name: 'Urine Protein', conv: 'Negative / <150 mg/24 hr', si: '<0.15 g/24 hr' }
+    ];
+
+    /* =========================================================
+       3. STATE MANAGEMENT (TV Font Sizes)
+       ========================================================= */
+    let currentIndex = 0;
+    const userAnswers = {};        // { qIdx: selectedOptIdx }
+    const markedQuestions = {};    // { qIdx: boolean }
+    const questionNotes = {};      // { qIdx: string }
+    const strikethroughs = {};     // { `${qIdx}_${optIdx}`: boolean }
+    const answerRevealed = {};     // { qIdx: boolean } -> Tracks if "Show Answer" is toggled on
+
+    let isReviewMode = false;
+    let textZoomIndex = 0;
+    const zoomVignetteFontSizes = ['22px', '26px', '30px'];
+    const zoomOptionFontSizes = ['20px', '24px', '28px'];
+
+    const teamScores = {
+      green: 0,
+      blue: 0,
+      purple: 0,
+      orange: 0
+    };
+
+    function updateTeamScore(team, delta) {
+      teamScores[team] = (teamScores[team] || 0) + delta;
+      const scoreEl = document.getElementById(`score-${team}`);
+      if (scoreEl) {
+        scoreEl.textContent = teamScores[team];
+      }
+    }
+
+    function loadCustomTeamLogo(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const objectUrl = URL.createObjectURL(file);
+      const img = document.getElementById('greenTeamLogoImg');
+      if (img) {
+        img.src = objectUrl;
+        img.classList.add('mix-blend-multiply');
+      }
+    }
+
+    /* =========================================================
+       4. INITIALIZATION & RENDERING
+       ========================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      renderCurrentQuestion();
+      populateLabTable(labValues);
+      setupDraggableModals();
+      setupTextHighlighter();
+    });
+
+    function renderCurrentQuestion() {
+      // Always reset viewport scroll position to the top
+      const qContainer = document.getElementById('questionContainer');
+      if (qContainer) {
+        qContainer.scrollTop = 0;
+      }
+
+      const q = questions[currentIndex];
+      const isWelcomeSlide = !!q.isWelcome;
+      const isRevealed = !isWelcomeSlide && (!!answerRevealed[currentIndex] || isReviewMode);
+
+      // Update counter: "Welcome" on intro slide, otherwise "X of 21"
+      document.getElementById('itemCounterDisplay').textContent = isWelcomeSlide
+        ? `1 of ${questions.length} (Welcome)`
+        : `${currentIndex + 1} of ${questions.length}`;
+
+      // Update subtle Korean answer indicator beside End Block
+      const koreanLetters = ['에', '비', '씨', '디', '이'];
+      const koreanHintEl = document.getElementById('koreanAnswerHint');
+      if (koreanHintEl) {
+        koreanHintEl.textContent = isWelcomeSlide ? '' : (koreanLetters[q.correctIndex] || '');
+      }
+
+      // Update Mark button
+      const isMarked = !!markedQuestions[currentIndex];
+      const markBtn = document.getElementById('markBtn');
+      const markFlagIcon = document.getElementById('markFlagIcon');
+      if (isMarked) {
+        markBtn.classList.add('bg-[#c87a12]', 'border-yellow-300');
+        markFlagIcon.classList.remove('stroke-white', 'fill-white');
+        markFlagIcon.classList.add('stroke-yellow-200', 'fill-yellow-400');
+      } else {
+        markBtn.classList.remove('bg-[#c87a12]', 'border-yellow-300');
+        markFlagIcon.classList.add('stroke-white', 'fill-white');
+        markFlagIcon.classList.remove('stroke-yellow-200', 'fill-yellow-400');
+      }
+
+      // Vignette with large TV-friendly font
+      const vignetteEl = document.getElementById('vignetteText');
+      vignetteEl.innerHTML = q.vignette;
+      vignetteEl.style.fontSize = zoomVignetteFontSizes[textZoomIndex];
+
+      // Options container visibility & population
+      const optionsBoxContainer = document.getElementById('optionsBoxContainer');
+      const optionsFieldset = document.getElementById('optionsFieldset');
+      const showAnswerBtn = document.getElementById('showAnswerBtn');
+      const nextItemBtn = document.getElementById('nextItemBtn');
+      const nextItemBtnText = document.getElementById('nextItemBtnText');
+
+      if (isWelcomeSlide) {
+        optionsBoxContainer.classList.add('hidden');
+        showAnswerBtn.classList.add('hidden');
+        nextItemBtn.className = 'bg-[#1b6399] hover:bg-[#134e7a] text-white px-7 py-3.5 rounded text-base sm:text-xl font-bold tracking-wide shadow-md border border-[#0d4770] flex items-center space-x-2.5 cursor-pointer transition';
+        nextItemBtnText.textContent = 'Start Questions';
+      } else {
+        optionsBoxContainer.classList.remove('hidden');
+        showAnswerBtn.classList.remove('hidden');
+        nextItemBtn.className = 'bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded text-base sm:text-lg font-medium border border-gray-300 flex items-center space-x-2 transition';
+        nextItemBtnText.textContent = 'Next Item';
+
+        optionsFieldset.innerHTML = '';
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+
+        q.options.forEach((optText, optIdx) => {
+          const optionId = `opt_${currentIndex}_${optIdx}`;
+          const strikeKey = `${currentIndex}_${optIdx}`;
+          const isStruck = !!strikethroughs[strikeKey];
+          const isSelected = userAnswers[currentIndex] === optIdx;
+          const isCorrect = isRevealed && (q.correctIndex === optIdx);
+          const isWrongSelected = isRevealed && isSelected && (q.correctIndex !== optIdx);
+
+          const row = document.createElement('div');
+          row.className = `flex items-start space-x-3.5 p-3 rounded transition cursor-pointer select-none ${
+            isCorrect ? 'bg-emerald-50 border-2 border-emerald-500' : 
+            isWrongSelected ? 'bg-red-50 border border-red-400' : 'hover:bg-gray-100/70 border border-transparent'
+          }`;
+
+          // Right-click event to strike out
+          row.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            toggleStrikethrough(currentIndex, optIdx);
+          });
+
+          row.innerHTML = `
+            <input type="radio" name="question_choice" id="${optionId}" value="${optIdx}" 
+              ${isSelected ? 'checked' : ''} 
+              ${isRevealed ? 'disabled' : ''}
+              class="fred-radio mt-1.5 w-5 h-5 cursor-pointer"
+              onchange="selectOption(${optIdx})"
+            >
+            <label for="${optionId}" class="flex-1 cursor-pointer leading-snug ${isStruck ? 'strike-through' : ''} ${
+              isCorrect ? 'font-bold text-emerald-900' : isWrongSelected ? 'line-through text-red-900 font-medium' : 'text-gray-900'
+            }" style="font-size: ${zoomOptionFontSizes[textZoomIndex]}">
+              <span class="font-bold mr-2">${letters[optIdx]}.</span>
+              <span>${optText}</span>
+              ${isCorrect ? '<span class="ml-3 text-xs bg-emerald-600 text-white font-bold px-2.5 py-1 rounded shadow-xs inline-block">CORRECT ANSWER</span>' : ''}
+              ${isWrongSelected ? '<span class="ml-3 text-xs bg-red-600 text-white font-bold px-2.5 py-1 rounded shadow-xs inline-block">YOUR CHOICE</span>' : ''}
+            </label>
+          `;
+          optionsFieldset.appendChild(row);
+        });
+      }
+
+      // Show/Hide Answer Button text
+      const showAnswerBtnText = document.getElementById('showAnswerBtnText');
+      showAnswerBtnText.textContent = isRevealed ? 'Hide Answer' : 'Show Answer';
+
+      // Explanation display
+      const expContainer = document.getElementById('explanationContainer');
+      const expContent = document.getElementById('explanationContent');
+      const expRefs = document.getElementById('explanationReferences');
+      const expBadge = document.getElementById('explanationStatusBadge');
+
+      if (isRevealed) {
+        expContainer.classList.remove('hidden');
+        expContent.innerHTML = q.rationale;
+        expRefs.innerHTML = `<b>References:</b><br>${q.references}`;
+
+        const answered = userAnswers[currentIndex];
+        if (answered === undefined) {
+          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-gray-200 text-gray-700';
+          expBadge.textContent = 'Unanswered';
+        } else if (answered === q.correctIndex) {
+          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+          expBadge.textContent = 'Correct';
+        } else {
+          expBadge.className = 'px-3 py-1 text-xs sm:text-sm font-bold rounded-full bg-red-100 text-red-800 border border-red-300';
+          expBadge.textContent = 'Incorrect';
+        }
+      } else {
+        expContainer.classList.add('hidden');
+      }
+
+      // Notes
+      document.getElementById('notesTitle').textContent = isWelcomeSlide
+        ? 'Notes (Welcome Slide)'
+        : `Notes (Item ${currentIndex + 1} / ITE ${q.iteNumber})`;
+      document.getElementById('notesTextarea').value = questionNotes[currentIndex] || '';
+
+      renderSidebar();
+    }
+
+    function renderSidebar() {
+      const container = document.getElementById('itemNumbersList');
+      container.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const isCurrent = idx === currentIndex;
+        const isWelcomeSlide = !!q.isWelcome;
+        const isAnswered = !isWelcomeSlide && userAnswers[idx] !== undefined;
+        const isMarked = !!markedQuestions[idx];
+        const isRevealed = !isWelcomeSlide && (!!answerRevealed[idx] || isReviewMode);
+
+        const itemBox = document.createElement('button');
+        itemBox.onclick = () => jumpToQuestion(idx);
+        // Sharp rectangular borders (rounded-none) matching authentic NBME left strip
+        itemBox.className = `w-14 sm:w-16 h-7 rounded-none relative flex items-center justify-center font-bold text-xs sm:text-sm tracking-tight transition cursor-pointer select-none ${
+          isCurrent 
+            ? 'bg-fredHeader text-white ring-2 ring-blue-400 font-extrabold shadow-sm' 
+            : 'bg-white text-gray-800 border-b border-r border-[#cfd9e0] hover:bg-gray-100'
+        }`;
+
+        // Question index number (1 to 21)
+        itemBox.innerHTML = `<span>${idx + 1}</span>`;
+
+        // Flag icon if marked
+        if (isMarked) {
+          const flag = document.createElement('span');
+          flag.className = 'absolute top-0.5 right-1 w-2 h-2 bg-yellow-400 border border-amber-600 shadow-xs';
+          itemBox.appendChild(flag);
+        }
+
+        // Answered checkmark
+        if (isAnswered) {
+          const check = document.createElement('span');
+          check.className = `absolute bottom-0.5 left-1 text-[10px] font-bold ${isCurrent ? 'text-blue-200' : 'text-fredHeader'}`;
+          check.innerHTML = '&#10003;';
+          itemBox.appendChild(check);
+        }
+
+        // Small indicator if answer was already checked
+        if (isRevealed) {
+          const dot = document.createElement('span');
+          const isCorrect = userAnswers[idx] === q.correctIndex;
+          dot.className = `absolute top-0.5 left-1 w-1.5 h-1.5 ${isCorrect ? 'bg-emerald-400' : 'bg-red-400'}`;
+          itemBox.appendChild(dot);
+        }
+
+        container.appendChild(itemBox);
+      });
+    }
+
+    /* =========================================================
+       5. ACTIONS & STUDY FEATURES
+       ========================================================= */
+    function navigateQuestion(delta) {
+      const newIdx = currentIndex + delta;
+      if (newIdx >= 0 && newIdx < questions.length) {
+        currentIndex = newIdx;
+        renderCurrentQuestion();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      if (idx >= 0 && idx < questions.length) {
+        currentIndex = idx;
+        renderCurrentQuestion();
+      }
+    }
+
+    function selectOption(optIdx) {
+      if (answerRevealed[currentIndex] || isReviewMode) return;
+      userAnswers[currentIndex] = optIdx;
+      renderSidebar();
+    }
+
+    function toggleShowAnswer() {
+      answerRevealed[currentIndex] = !answerRevealed[currentIndex];
+      renderCurrentQuestion();
+    }
+
+    function toggleMarkCurrentQuestion() {
+      markedQuestions[currentIndex] = !markedQuestions[currentIndex];
+      renderCurrentQuestion();
+    }
+
+    function toggleStrikethrough(qIdx, optIdx) {
+      const key = `${qIdx}_${optIdx}`;
+      strikethroughs[key] = !strikethroughs[key];
+      renderCurrentQuestion();
+    }
+
+    /* =========================================================
+       6. TEXT ZOOM & REVERSE COLOR (TV Scaled)
+       ========================================================= */
+    function cycleTextZoom() {
+      textZoomIndex = (textZoomIndex + 1) % zoomVignetteFontSizes.length;
+      const vignetteEl = document.getElementById('vignetteText');
+      vignetteEl.style.fontSize = zoomVignetteFontSizes[textZoomIndex];
+      
+      const labels = document.querySelectorAll('#optionsFieldset label');
+      labels.forEach(l => l.style.fontSize = zoomOptionFontSizes[textZoomIndex]);
+
+      const indicator = document.getElementById('zoomLevelIndicator');
+      indicator.textContent = textZoomIndex === 0 ? 'Text Zoom' : `Zoom (${zoomVignetteFontSizes[textZoomIndex]})`;
+    }
+
+    function toggleReverseColor() {
+      document.documentElement.classList.toggle('reverse-color');
+    }
+
+    /* =========================================================
+       8. SUBMISSION & REVIEW MODAL
+       ========================================================= */
+    function showEndBlockModal() {
+      const modal = document.getElementById('endBlockModal');
+      const examQuestionsCount = questions.filter(q => !q.isWelcome).length;
+      const answeredExamCount = Object.keys(userAnswers).filter(idx => !questions[idx]?.isWelcome).length;
+      document.getElementById('summaryTotalCount').textContent = examQuestionsCount;
+      document.getElementById('summaryAnsweredCount').textContent = answeredExamCount;
+      document.getElementById('summaryFlaggedCount').textContent = Object.values(markedQuestions).filter(Boolean).length;
+      modal.classList.remove('hidden');
+    }
+
+    function closeEndBlockModal() {
+      document.getElementById('endBlockModal').classList.add('hidden');
+    }
+
+    function confirmSubmitExam() {
+      closeEndBlockModal();
+      isReviewMode = true;
+
+      // Calculate score across the 20 ITE questions (excluding Welcome slide)
+      let correctCount = 0;
+      let totalExamQuestions = 0;
+      questions.forEach((q, idx) => {
+        if (q.isWelcome) return;
+        totalExamQuestions++;
+        answerRevealed[idx] = true;
+        if (userAnswers[idx] === q.correctIndex) {
+          correctCount++;
+        }
+      });
+      const pct = Math.round((correctCount / totalExamQuestions) * 100);
+
+      const bannerContainer = document.getElementById('bannerContainer');
+      bannerContainer.innerHTML = `
+        <div class="bg-blue-900 text-white px-4 py-2 text-center text-xs sm:text-sm font-semibold shadow-md">
+          Block Completed! Score: <span class="text-yellow-300 font-bold">${correctCount} / ${totalExamQuestions} (${pct}%)</span>. All 20 items now display complete ABFM board critique rationales.
+        </div>
+      `;
+
+      renderCurrentQuestion();
+    }
+
+    /* =========================================================
+       9. MODALS & DRAGGING
+       ========================================================= */
+    function toggleModal(modalId) {
+      const el = document.getElementById(modalId);
+      el.classList.toggle('hidden');
+    }
+
+    function saveCurrentNote(val) {
+      questionNotes[currentIndex] = val;
+    }
+
+    function clearCurrentNote() {
+      questionNotes[currentIndex] = '';
+      document.getElementById('notesTextarea').value = '';
+    }
+
+    function setupDraggableModals() {
+      ['labModal', 'calcModal', 'notesModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        const header = modal.querySelector('.cursor-move');
+        if (!header) return;
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        header.addEventListener('mousedown', (e) => {
+          if (e.target.tagName === 'BUTTON') return;
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = modal.getBoundingClientRect();
+          initialLeft = rect.left;
+          initialTop = rect.top;
+          
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          modal.style.left = `${initialLeft + dx}px`;
+          modal.style.top = `${initialTop + dy}px`;
+          modal.style.right = 'auto';
+        }
+
+        function onMouseUp() {
+          isDragging = false;
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+      });
+    }
+
+    /* =========================================================
+       10. LAB REFERENCE VALUES SEARCH & FILTER
+       ========================================================= */
+    function populateLabTable(list) {
+      const tbody = document.getElementById('labTableBody');
+      tbody.innerHTML = '';
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-500">No laboratory tests matching your search.</td></tr>`;
+        return;
+      }
+      list.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-blue-50/60';
+        tr.innerHTML = `
+          <td class="p-2 font-medium border-r border-gray-200">${item.name}</td>
+          <td class="p-2 text-gray-700 border-r border-gray-200">${item.conv}</td>
+          <td class="p-2 text-gray-700">${item.si}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterLabCategory(cat) {
+      const tabs = document.querySelectorAll('.lab-tab');
+      tabs.forEach(t => {
+        t.className = 'px-2.5 py-1 bg-white text-gray-700 border rounded font-medium hover:bg-gray-50 lab-tab';
+      });
+      event.target.className = 'px-2.5 py-1 bg-fredHeader text-white rounded font-medium lab-tab';
+
+      if (cat === 'all') {
+        populateLabTable(labValues);
+      } else {
+        const filtered = labValues.filter(l => l.category === cat);
+        populateLabTable(filtered);
+      }
+    }
+
+    function searchLabs(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        populateLabTable(labValues);
+        return;
+      }
+      const filtered = labValues.filter(l => 
+        l.name.toLowerCase().includes(q) || 
+        l.category.toLowerCase().includes(q)
+      );
+      populateLabTable(filtered);
+    }
+
+    /* =========================================================
+       11. CALCULATOR LOGIC
+       ========================================================= */
+    let calcCurrent = '0';
+    let calcPrevious = null;
+    let calcOperation = null;
+
+    function updateCalcDisplay() {
+      document.getElementById('calcDisplay').textContent = calcCurrent;
+    }
+
+    function calcNum(num) {
+      if (calcCurrent === '0' && num !== '.') {
+        calcCurrent = num;
+      } else if (num === '.' && calcCurrent.includes('.')) {
+        return;
+      } else {
+        calcCurrent += num;
+      }
+      updateCalcDisplay();
+    }
+
+    function calcOp(op) {
+      calcOperation = op;
+      calcPrevious = calcCurrent;
+      calcCurrent = '0';
+    }
+
+    function calcClear() {
+      calcCurrent = '0';
+      calcPrevious = null;
+      calcOperation = null;
+      updateCalcDisplay();
+    }
+
+    function calcSqrt() {
+      const val = parseFloat(calcCurrent);
+      if (val >= 0) {
+        calcCurrent = String(Math.sqrt(val));
+        updateCalcDisplay();
+      }
+    }
+
+    function calcEquals() {
+      if (!calcOperation || calcPrevious === null) return;
+      const a = parseFloat(calcPrevious);
+      const b = parseFloat(calcCurrent);
+      let res = 0;
+      switch (calcOperation) {
+        case '+': res = a + b; break;
+        case '-': res = a - b; break;
+        case '*': res = a * b; break;
+        case '/': res = b !== 0 ? a / b : 'Error'; break;
+        case '%': res = (a * b) / 100; break;
+      }
+      calcCurrent = String(res);
+      calcPrevious = null;
+      calcOperation = null;
+      updateCalcDisplay();
+    }
+
+    /* =========================================================
+       12. TEXT HIGHLIGHTING TOOL
+       ========================================================= */
+    function setupTextHighlighter() {
+      const vignette = document.getElementById('vignetteText');
+
+      // Click on an existing highlight to toggle/remove it
+      vignette.addEventListener('click', (e) => {
+        const target = e.target.closest('.user-highlight');
+        if (!target) return;
+
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return; // Ignore if user is currently selecting text
+
+        const parent = target.parentNode;
+        while (target.firstChild) {
+          parent.insertBefore(target.firstChild, target);
+        }
+        parent.removeChild(target);
+        parent.normalize(); // Merge adjacent text nodes for clean future selections
+      });
+
+      // Highlight on mouse release
+      vignette.addEventListener('mouseup', handleHighlightAction);
+
+      // Support mobile / touch drag selections
+      vignette.addEventListener('touchend', () => {
+        setTimeout(handleHighlightAction, 50);
+      });
+    }
+
+    function handleHighlightAction() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
+
+      const vignette = document.getElementById('vignetteText');
+      const range = sel.getRangeAt(0);
+
+      // Verify the selection is inside the clinical vignette
+      if (!vignette.contains(range.commonAncestorContainer) && range.commonAncestorContainer !== vignette) {
+        return;
+      }
+
+      const selectedText = sel.toString();
+      if (!selectedText || !selectedText.trim()) return;
+
+      try {
+        // Collect all text nodes that intersect the selection range
+        const textNodes = [];
+        const treeWalker = document.createTreeWalker(
+          vignette,
+          NodeFilter.SHOW_TEXT,
+          null
+        );
+
+        let node;
+        while ((node = treeWalker.nextNode())) {
+          if (!node.textContent || node.textContent.length === 0) continue;
+          if (range.intersectsNode && range.intersectsNode(node)) {
+            textNodes.push(node);
+          }
+        }
+
+        // Process text nodes to wrap selected portions in .user-highlight
+        textNodes.forEach((tNode) => {
+          // If already inside an existing highlight span, don't re-wrap
+          if (tNode.parentElement && tNode.parentElement.closest('.user-highlight')) {
+            return;
+          }
+
+          let start = 0;
+          let end = tNode.length;
+
+          if (tNode === range.startContainer) {
+            start = range.startOffset;
+          }
+          if (tNode === range.endContainer) {
+            end = range.endOffset;
+          }
+
+          if (start >= end) return;
+
+          const middle = tNode.splitText(start);
+          middle.splitText(end - start);
+
+          const span = document.createElement('span');
+          span.className = 'user-highlight';
+          span.textContent = middle.textContent;
+          middle.parentNode.replaceChild(span, middle);
+        });
+
+        // Merge contiguous or touching highlights
+        mergeAdjacentHighlights(vignette);
+
+      } catch (err) {
+        console.warn('Highlight failed:', err);
+      } finally {
+        sel.removeAllRanges();
+      }
+    }
+
+    function mergeAdjacentHighlights(container) {
+      container.normalize();
+      const highlights = Array.from(container.querySelectorAll('.user-highlight'));
+      highlights.forEach(h => {
+        if (!h.parentNode) return;
+
+        let next = h.nextSibling;
+        while (next) {
+          if (next.nodeType === Node.TEXT_NODE && next.textContent.length === 0) {
+            const emptyNode = next;
+            next = next.nextSibling;
+            emptyNode.remove();
+            continue;
+          }
+          if (next.nodeType === Node.ELEMENT_NODE && next.classList.contains('user-highlight')) {
+            while (next.firstChild) {
+              h.appendChild(next.firstChild);
+            }
+            const toRemove = next;
+            next = next.nextSibling;
+            toRemove.remove();
+            continue;
+          }
+          // If separated only by spaces on the same line, merge across the space
+          if (next.nodeType === Node.TEXT_NODE && next.textContent.trim() === '' && !next.textContent.includes('\n')) {
+            const candidate = next.nextSibling;
+            if (candidate && candidate.nodeType === Node.ELEMENT_NODE && candidate.classList.contains('user-highlight')) {
+              h.appendChild(next);
+              while (candidate.firstChild) {
+                h.appendChild(candidate.firstChild);
+              }
+              next = candidate.nextSibling;
+              candidate.remove();
+              continue;
+            }
+          }
+          break;
+        }
+      });
+      container.normalize();
+    }
+
+    function clearAllHighlights() {
+      const container = document.getElementById('vignetteText');
+      const highlighted = container.querySelectorAll('.user-highlight');
+      highlighted.forEach(el => {
+        const parent = el.parentNode;
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      });
+    }
+  </script>
+</body>
+</html>
